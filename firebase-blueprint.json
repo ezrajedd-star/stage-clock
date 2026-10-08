@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "Driver": {
+      "title": "Rally Driver",
+      "description": "Information about a rally driver and their stage times.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "carNumber": { "type": "string" },
+        "class": { "type": "string" },
+        "stageTimes": {
+          "type": "object",
+          "description": "Map of stage number (1-12) to recorded time in seconds."
+        },
+        "stagePenalties": {
+          "type": "object",
+          "description": "Map of stage number (1-12) to penalty time in seconds."
+        },
+        "totalTimeSeconds": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "carNumber", "class"]
+    },
+    "Settings": {
+      "title": "Global Settings",
+      "description": "Global configuration settings for the rally.",
+      "type": "object",
+      "properties": {
+        "dnfPenalty": { "type": "number", "description": "Seconds to add to the slowest stage time for a DNF." }
+      },
+      "required": ["dnfPenalty"]
+    }
+  },
+  "firestore": {
+    "drivers": {
+      "schema": "Driver",
+      "description": "Collection of all rally drivers and their results."
+    },
+    "settings": {
+      "schema": "Settings",
+      "description": "Global settings for the application."
+    }
+  }
+}

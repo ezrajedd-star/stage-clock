@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation for Driver
+    function isValidDriver(data) {
+      return data.keys().hasAll(['name', 'carNumber', 'class', 'stageTimes', 'stagePenalties', 'totalTimeSeconds', 'updatedAt'])
+        && data.keys().size() == 7
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.carNumber is string && data.carNumber.size() > 0 && data.carNumber.size() <= 20
+        && data.class is string && data.class.size() > 0 && data.class.size() <= 50
+        && data.stageTimes is map
+        && data.stagePenalties is map
+        && data.totalTimeSeconds is number && data.totalTimeSeconds >= 0
+        && data.updatedAt == request.time;
+    }
+
+    match /drivers/{driverId} {
+      allow read: if true; // Public standings
+      allow create: if isSignedIn() && isValidId(driverId) && isValidDriver(incoming());
+      allow update: if isSignedIn() && isValidId(driverId) && isValidDriver(incoming())
+        && (
+          // Ensure carNumber and class don't change if they are considered immutable for a race
+          incoming().carNumber == existing().carNumber &&
+          incoming().class == existing().class
+        );
+      allow delete: if false; // Only admins can delete
+    }
+  }
+}
