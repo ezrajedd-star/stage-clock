@@ -9,6 +9,18 @@ service cloud.firestore {
       return request.auth != null && request.auth.token.email_verified == true;
     }
 
+    // Admin: can enter times and manage the operator list.
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email.lower() == 'ezrajedd@gmail.com';
+    }
+
+    // Operator: the admin, or a timing staff member listed in /operators/{email}
+    // (document ID = the staff member's Google account email, lowercase).
+    function isOperator() {
+      return isAdmin() || (isSignedIn()
+        && exists(/databases/$(database)/documents/operators/$(request.auth.token.email.lower())));
+    }
+
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_.-]+$');
     }
@@ -37,21 +49,26 @@ service cloud.firestore {
 
     match /drivers/{driverId} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidId(driverId) && isValidDriver(incoming())
+      allow create: if isOperator() && isValidId(driverId) && isValidDriver(incoming())
         && (!('isHidden' in incoming()) || incoming().isHidden is bool);
-      allow update: if isSignedIn() && isValidId(driverId)
+      allow update: if isOperator() && isValidId(driverId)
         && (
           // Action: Normal update from console
           (isValidDriver(incoming()) && incoming().carNumber == existing().carNumber) ||
           // Action: Toggle visibility (merge update)
           (incoming().diff(existing()).affectedKeys().hasOnly(['isHidden', 'updatedAt']) && incoming().updatedAt == request.time)
         );
-      allow delete: if isSignedIn() && isValidId(driverId);
+      allow delete: if isOperator() && isValidId(driverId);
+    }
+
+    match /operators/{email} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.token.email.lower() == email);
+      allow write: if isAdmin();
     }
 
     match /settings/{settingId} {
       allow read: if true;
-      allow write: if isSignedIn() && isValidId(settingId) && isValidSettings(incoming());
+      allow write: if isOperator() && isValidId(settingId) && isValidSettings(incoming());
     }
   }
 }
