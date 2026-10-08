@@ -13,13 +13,17 @@ export default defineConfig(({mode}) => {
       VitePWA({
         registerType: 'autoUpdate',
         manifest: {
-          name: 'Stage Clock',
-          short_name: 'StageClock',
-          description: 'Professional rally timing system',
-          theme_color: '#000000',
-          background_color: '#000000',
+          name: 'Stage Clock by Ezra Decena',
+          short_name: 'Stage Clock',
+          description: 'Live rally stage times, class standings and results.',
+          theme_color: '#090A0C',
+          background_color: '#090A0C',
           display: 'standalone',
-          icons: []
+          icons: [
+            { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+            { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+            { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          ]
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg}']
