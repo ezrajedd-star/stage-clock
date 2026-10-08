@@ -1,0 +1,25 @@
+# Dependencies and build output
+node_modules/
+build/
+dist/
+dev-dist/
+coverage/
+
+# Environment and secrets (keep .env.example)
+.env*
+!.env.example
+firebase-applet-config.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
