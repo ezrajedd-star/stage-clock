@@ -35,9 +35,19 @@ interface MasterEntryListProps extends ResultsDisplayProps {
 }
 
 export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDriver, showHidden, onToggleShowHidden }: MasterEntryListProps) {
-  const [viewMode, setViewMode] = useState<'stages' | 'leaderboard'>('stages');
+  // Phones open on the leaderboard (fits the screen); larger screens on stage times.
+  const [viewMode, setViewMode] = useState<'stages' | 'leaderboard'>(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'leaderboard' : 'stages'
+  );
   const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null);
   const stages = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  // Display only: show stage columns that have at least one recorded result.
+  const visibleStages = stages.filter(s => drivers.some(d => d.stageTimes?.[s.toString()] !== undefined));
+  // Row controls (hide/delete) only for authorized operators.
+  const showOps = viewMode === 'stages' && !!(onToggleHidden || onDeleteDriver);
+  // In stage view, POS / # / DRIVER stay pinned while stage columns scroll sideways.
+  const pin = viewMode === 'stages';
 
   const classes = Array.from(new Set(drivers.map(d => d.class.trim().toUpperCase()))).sort();
 
@@ -126,7 +136,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
   }, [drivers, classStats, overallStats, settings.dnfPenalty, settings.dnfCalculationMethod, stages]);
 
   const exportToCSV = () => {
-    const headers = ['Pos', 'Car', 'Driver', 'Class', ...stages.map(s => `SS${s}`), 'Total Time'];
+    const headers = ['Pos', 'Car', 'Driver', 'Class', ...visibleStages.map(s => `SS${s}`), 'Total Time'];
     const rows = processedDrivers
       .filter(d => showHidden || !d.isHidden)
       .sort((a, b) => a.effectiveTotal - b.effectiveTotal)
@@ -135,7 +145,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
         d.carNumber,
         `"${d.name}"`,
         `"${d.class}"`,
-        ...stages.map(s => {
+        ...visibleStages.map(s => {
           const time = d.stageTimes[s.toString()];
           const effectiveTime = d.effectiveStageTimes[s.toString()];
           const penalty = d.stagePenalties[s.toString()];
@@ -168,10 +178,10 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="shrink-0 p-2 border-b border-(--line) bg-(--bg-header) flex justify-between items-center text-white z-20">
-        <div className="flex items-center gap-3">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-(--text-secondary)">Master Results • {viewMode === 'stages' ? 'Stage Times' : 'Leaderboard'}</h2>
-          <div className="flex items-center gap-2">
+      <div className="shrink-0 p-2 border-b border-(--line) bg-(--bg-header) flex justify-between items-center gap-2 text-white z-20">
+        <div className="flex items-center gap-3 min-w-0">
+          <h2 className="hidden sm:block text-[10px] font-black uppercase tracking-widest text-(--text-secondary)">Master Results • {viewMode === 'stages' ? 'Stage Times' : 'Leaderboard'}</h2>
+          <div className="flex flex-wrap items-center gap-2">
             <div className="px-1.5 py-0.5 bg-(--accent)/10 border border-(--accent)/20 rounded text-[8px] text-(--accent) font-bold uppercase">
               {drivers.length} Entries
             </div>
@@ -183,7 +193,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                 {showHidden ? 'Hide DSQ' : 'Show DSQ'}
               </button>
             )}
-            <div className="h-4 w-px bg-(--line)/30 mx-1" />
+            <div className="hidden sm:block h-4 w-px bg-(--line)/30 mx-1" />
             <button 
               onClick={() => setViewMode('stages')}
               className={`flex items-center gap-1 text-[8px] px-1.5 py-0.5 border ${viewMode === 'stages' ? 'bg-(--accent) text-black border-(--accent)' : 'text-(--text-secondary) border-(--line)'} uppercase font-bold transition-all`}
@@ -219,27 +229,27 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
             const leader = classDrivers[0];
 
             return (
-              <div key={className} className={`mb-4 last:mb-0 ${viewMode === 'leaderboard' ? 'border border-(--line) bg-(--bg-panel) h-fit flex flex-col' : ''}`}>
+              <div key={className} className={`mb-4 last:mb-0 ${viewMode === 'leaderboard' ? 'border border-(--line) bg-(--bg-panel) h-fit flex flex-col' : 'min-w-full w-max'}`}>
                 <div className={`sticky top-0 z-10 bg-(--bg-header) border-y border-(--line) px-4 py-1 flex items-center justify-between ${viewMode === 'leaderboard' ? 'border-t-0' : ''}`}>
-                  <span className="text-[9px] font-black text-(--accent) uppercase tracking-[0.2em] italic">
+                  <span className="sticky left-4 text-[9px] font-black text-(--accent) uppercase tracking-[0.2em] italic">
                      {className} • CLASS GROUPING
                   </span>
                 </div>
                 <table className="w-full text-left border-collapse font-mono text-[10px]">
                   <thead className="text-(--text-secondary) bg-(--bg-deep)/50">
                     <tr className="border-b border-(--line)/10">
-                      {viewMode === 'stages' && (
+                      {showOps && (
                         <th className="px-2 py-1.5 font-black uppercase tracking-widest text-[8px] w-16 text-center">OPS</th>
                       )}
-                      <th className="px-2 py-1.5 font-black uppercase tracking-widest text-center w-12 text-(--text-secondary)">POS</th>
-                      <th className={`px-3 py-1.5 font-black uppercase tracking-widest ${viewMode === 'leaderboard' ? 'w-12' : 'w-16'}`}>#</th>
-                      <th className="px-3 py-1.5 font-black uppercase tracking-widest">DRIVER</th>
+                      <th className={`px-1 sm:px-2 py-1.5 font-black uppercase tracking-widest text-center text-(--text-secondary) ${pin ? 'sticky left-0 z-[2] bg-(--bg-panel) w-10 min-w-10 max-w-10' : 'w-10 sm:w-12'}`}>POS</th>
+                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${pin ? 'sticky left-10 z-[2] bg-(--bg-panel) w-12 min-w-12 max-w-12' : 'w-10 sm:w-12'}`}>#</th>
+                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${pin ? 'sticky left-22 z-[2] bg-(--bg-panel) w-28 min-w-28 max-w-28 border-r border-(--line)/30' : ''}`}>DRIVER</th>
                       {viewMode === 'leaderboard' && (
-                        <th className="px-3 py-1.5 font-black uppercase tracking-widest text-center w-16">STAGES</th>
+                        <th className="hidden sm:table-cell px-3 py-1.5 font-black uppercase tracking-widest text-center w-16">STAGES</th>
                       )}
-                      <th className={`px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--accent) ${viewMode === 'leaderboard' ? 'w-20' : 'w-24'}`}>TOTAL</th>
-                      <th className={`px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--text-secondary) border-(--line)/20 ${viewMode === 'leaderboard' ? 'w-20' : 'w-24 border-r'}`}>DIFF</th>
-                      {viewMode === 'stages' && stages.map(s => (
+                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--accent) ${viewMode === 'leaderboard' ? 'w-20' : 'w-24'}`}>TOTAL</th>
+                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--text-secondary) border-(--line)/20 ${viewMode === 'leaderboard' ? 'w-20' : 'w-24 border-r'}`}>DIFF</th>
+                      {viewMode === 'stages' && visibleStages.map(s => (
                         <th key={s} className="px-1 py-1.5 font-black uppercase tracking-widest text-center border-r border-(--line)/10 shrink-0 min-w-[55px]">SS{s}</th>
                       ))}
                     </tr>
@@ -267,7 +277,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                             animate={{ opacity: 1, x: 0 }}
                             className={`${d.isHidden ? 'opacity-40 grayscale bg-red-950/10' : ''} hover:bg-(--accent)/5 group transition-colors odd:bg-(--bg-panel) even:bg-(--bg-deep)`}
                           >
-                            {viewMode === 'stages' && (
+                            {showOps && (
                               <td className="px-2 py-0.5 whitespace-nowrap text-center">
                                 <div className="flex items-center justify-center gap-1.5">
                                   {onToggleHidden && (
@@ -291,13 +301,13 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                                 </div>
                               </td>
                             )}
-                            <td className={`px-2 py-0.5 text-center font-bold text-[10px] tabular-nums ${getPositionStyle(index + 1)}`}>
+                            <td className={`px-1 sm:px-2 py-0.5 text-center font-bold text-[10px] tabular-nums ${getPositionStyle(index + 1)} ${pin ? 'sticky left-0 z-[1] bg-inherit w-10 min-w-10 max-w-10' : ''}`}>
                               {getOrdinal(index + 1)}
                             </td>
-                            <td className={`px-3 py-0.5 font-black text-(--accent) italic ${viewMode === 'leaderboard' ? 'text-sm' : 'text-base'}`}>
+                            <td className={`px-2 sm:px-3 py-0.5 font-black text-(--accent) italic ${viewMode === 'leaderboard' ? 'text-sm' : 'text-base'} ${pin ? 'sticky left-10 z-[1] bg-inherit w-12 min-w-12 max-w-12' : ''}`}>
                               {d.carNumber}
                             </td>
-                            <td className="px-3 py-0.5 min-w-0">
+                            <td className={`px-2 sm:px-3 py-0.5 min-w-0 ${pin ? 'sticky left-22 z-[1] bg-inherit w-28 min-w-28 max-w-28 border-r border-(--line)/30' : ''}`}>
                               <div className="font-black text-white uppercase text-[10px] leading-tight tabular-nums truncate max-w-[100px]" title={d.name}>{d.name}</div>
                               {viewMode === 'leaderboard' && dnfDnsCount > 0 && (
                                 <div className="flex gap-0.5 mt-0.5">
@@ -308,23 +318,23 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                               )}
                             </td>
                             {viewMode === 'leaderboard' && (
-                              <td className="px-3 py-0.5 text-center">
+                              <td className="hidden sm:table-cell px-3 py-0.5 text-center">
                                 <div className="text-[10px] font-bold text-white/70">
                                   {Object.values(d.stageTimes).filter(v => v !== undefined).length}
                                 </div>
                               </td>
                             )}
-                            <td className="px-3 py-0.5 text-right">
+                            <td className="px-2 sm:px-3 py-0.5 text-right whitespace-nowrap">
                               <div className={`font-black ${viewMode === 'leaderboard' ? 'text-[11px]' : 'text-[12px]'} ${dnfDnsCount > 0 ? 'text-red-400' : 'text-(--accent)'}`}>
                                 {secondsToTime(d.effectiveTotal)}
                               </div>
                             </td>
-                            <td className={`px-3 py-0.5 text-right border-(--line)/20 ${viewMode === 'stages' ? 'border-r' : ''}`}>
+                            <td className={`px-2 sm:px-3 py-0.5 text-right whitespace-nowrap border-(--line)/20 ${viewMode === 'stages' ? 'border-r' : ''}`}>
                               <div className={`text-[9px] font-bold ${isLeader ? 'text-(--accent-ready)' : 'text-(--text-secondary)'}`}>
                                 {diff}
                               </div>
                             </td>
-                            {viewMode === 'stages' && stages.map(s => {
+                            {viewMode === 'stages' && visibleStages.map(s => {
                               const stageKey = s.toString();
                               const time = d.stageTimes[stageKey];
                               const effectiveTime = d.effectiveStageTimes[stageKey];

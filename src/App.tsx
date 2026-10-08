@@ -24,6 +24,9 @@ import { MasterEntryList, ClassStandings } from './components/ResultsDisplay';
 import { motion } from 'motion/react';
 import { Activity, LogIn, Trophy, Timer, Shield, Settings as SettingsIcon } from 'lucide-react';
 
+// Must match the admin email in firestore.rules.
+const ADMIN_EMAIL = 'ezrajedd@gmail.com';
+
 export default function App() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [settings, setSettings] = useState<Settings>({ dnfPenalty: 60 });
@@ -32,6 +35,25 @@ export default function App() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showHidden, setShowHidden] = useState(false);
+  const [isOperator, setIsOperator] = useState(false);
+
+  // Operators (admin or listed in /operators) get the input terminal and row controls.
+  useEffect(() => {
+    const email = user?.email?.toLowerCase();
+    if (!user || !email || !user.emailVerified) {
+      setIsOperator(false);
+      return;
+    }
+    if (email === ADMIN_EMAIL) {
+      setIsOperator(true);
+      return;
+    }
+    let active = true;
+    getDoc(doc(db, 'operators', email))
+      .then(snap => { if (active) setIsOperator(snap.exists()); })
+      .catch(() => { if (active) setIsOperator(false); });
+    return () => { active = false; };
+  }, [user]);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
@@ -198,12 +220,12 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden border-4 border-(--bg-darker) bg-(--bg-deep) text-(--text-primary)">
+    <div className="min-h-screen md:h-screen flex flex-col md:overflow-hidden border-2 md:border-4 border-(--bg-darker) bg-(--bg-deep) text-(--text-primary)">
       {/* Header */}
-      <header className="h-16 bg-(--bg-header) border-b border-(--line) flex items-center justify-between px-8 shadow-2xl relative z-10 shrink-0">
-        <div className="flex items-center gap-6">
-            <div className="w-12 h-12 bg-(--accent) flex items-center justify-center rounded-sm skew-x-[-12deg] group relative overflow-hidden">
-             <svg viewBox="0 0 24 24" className="w-9 h-9 text-black skew-x-[12deg] fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <header className="h-14 md:h-16 bg-(--bg-header) border-b border-(--line) flex items-center justify-between gap-3 px-3 md:px-8 shadow-2xl relative z-10 shrink-0">
+        <div className="flex items-center gap-3 md:gap-6 min-w-0">
+            <div className="w-9 h-9 md:w-12 md:h-12 shrink-0 bg-(--accent) flex items-center justify-center rounded-sm skew-x-[-12deg] group relative overflow-hidden">
+             <svg viewBox="0 0 24 24" className="w-7 h-7 md:w-9 md:h-9 text-black skew-x-[12deg] fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                {/* Tire Outer */}
                <circle cx="12" cy="12" r="9" />
                {/* Tire Inner Rim */}
@@ -218,17 +240,17 @@ export default function App() {
              </svg>
            </div>
            <div>
-             <h1 className="text-2xl font-black tracking-tighter text-white uppercase leading-none mb-1">
+             <h1 className="text-lg md:text-2xl whitespace-nowrap font-black tracking-tighter text-white uppercase leading-none mb-1">
                Stage <span className="text-(--accent)">Clock</span>
              </h1>
-             <p className="text-[10px] text-(--text-secondary) tracking-[0.2em] uppercase font-mono">
+             <p className="hidden sm:block text-[10px] text-(--text-secondary) tracking-[0.2em] uppercase font-mono">
                Rally Timing Engine by Ezra Decena
              </p>
            </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-8 text-right">
-          <div className="border-r border-(--line) pr-8 flex items-center gap-3">
+        <div className="flex items-center gap-8 text-right shrink-0">
+          <div className="hidden md:flex border-r border-(--line) pr-8 items-center gap-3">
             <div>
               <p className="text-[10px] text-(--text-secondary) uppercase mb-1">Status</p>
               <p className="text-lg font-mono text-(--accent) font-bold">LIVE FEED</p>
@@ -239,14 +261,14 @@ export default function App() {
             {!user ? (
               <button 
                 onClick={signIn}
-                className="bg-(--accent) text-black px-4 py-1.5 font-mono text-[10px] font-black uppercase tracking-widest hover:bg-white transition-colors skew-x-[-12deg]"
+                className="bg-(--accent) text-black px-3 md:px-4 py-1.5 font-mono text-[10px] font-black uppercase tracking-widest hover:bg-white transition-colors skew-x-[-12deg]"
               >
                 <span className="inline-block skew-x-[12deg]">Auth Required</span>
               </button>
             ) : (
               <div className="text-right">
-                <p className="text-[10px] text-(--text-secondary) uppercase mb-1">Operator</p>
-                <p className="text-lg font-mono text-white max-w-[150px] truncate">{user.email?.split('@')[0]}</p>
+                <p className="text-[9px] md:text-[10px] text-(--text-secondary) uppercase mb-0.5 md:mb-1">{isOperator ? 'Operator' : 'View Only'}</p>
+                <p className="text-sm md:text-lg font-mono text-white max-w-[110px] md:max-w-[150px] truncate">{user.email?.split('@')[0]}</p>
               </div>
             )}
           </div>
@@ -254,26 +276,26 @@ export default function App() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 flex overflow-hidden p-1 bg-(--bg-darker) gap-1">
-        <div className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col md:flex-row md:overflow-hidden p-1 bg-(--bg-darker) gap-1">
+        <div className="flex-1 min-w-0 flex flex-col md:overflow-hidden">
           {/* Main List Area */}
-          <section className="flex-1 bg-(--bg-panel) border border-(--line) flex flex-col overflow-hidden">
+          <section className="flex-1 bg-(--bg-panel) border border-(--line) flex flex-col md:overflow-hidden">
             <div className="flex-1 overflow-auto custom-scrollbar p-0">
               <MasterEntryList 
                 drivers={drivers} 
                 settings={settings}
                 showHidden={showHidden}
                 onToggleShowHidden={() => setShowHidden(!showHidden)}
-                onToggleHidden={user ? handleToggleHidden : undefined}
-                onDeleteDriver={user ? handleDeleteDriver : undefined}
+                onToggleHidden={isOperator ? handleToggleHidden : undefined}
+                onDeleteDriver={isOperator ? handleDeleteDriver : undefined}
               />
             </div>
           </section>
         </div>
 
         {/* Right Sidebar: Input Terminal */}
-        {user && (
-          <aside className="w-80 shrink-0 bg-(--bg-panel) border border-(--line) flex flex-col overflow-hidden">
+        {user && isOperator && (
+          <aside className="order-first md:order-none w-full md:w-80 shrink-0 bg-(--bg-panel) border border-(--line) flex flex-col md:overflow-hidden">
             <div className="p-3 border-b border-(--line) bg-(--bg-header) flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] text-(--accent) uppercase font-black tracking-widest flex items-center gap-2">
@@ -288,7 +310,7 @@ export default function App() {
               )}
             </div>
             
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <div className="flex-1 md:overflow-y-auto custom-scrollbar">
               <InputConsole 
                 onUpdate={handleUpdate} 
                 isLoading={processing} 
@@ -302,12 +324,12 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="h-10 bg-(--bg-deep) border-t border-(--line) px-6 flex items-center justify-between text-[10px] text-(--text-subtle) uppercase tracking-widest font-bold shrink-0">
+      <footer className="min-h-10 py-2 md:py-0 bg-(--bg-deep) border-t border-(--line) px-3 md:px-6 flex items-center justify-between text-[9px] md:text-[10px] text-(--text-subtle) uppercase tracking-widest font-bold shrink-0">
         <div>
           System: <span className="text-(--accent-ready)">Running</span> • 
           Data: <span className="text-(--accent-ready)">Online</span>
         </div>
-        <div>
+        <div className="hidden sm:block">
           Stage Clock Official Timing Engine v4.2
         </div>
       </footer>
