@@ -17,13 +17,7 @@ Originally built in Google AI Studio.
    npm install
    ```
 
-2. Create your local environment file and fill in the values:
-
-   ```sh
-   cp .env.example .env.local
-   ```
-
-3. Start the dev server:
+2. Start the dev server:
 
    ```sh
    npm run dev
@@ -31,23 +25,18 @@ Originally built in Google AI Studio.
 
    The app runs at http://localhost:3000.
 
-## Environment variables
+## Deployment
 
-All variables go in `.env.local`, which git ignores. `.env.example` lists them without values.
+The site is hosted on Vercel at https://stage-clock-rho.vercel.app/. Every push to `main` on GitHub rebuilds and redeploys it automatically. No environment variables are needed.
 
-| Variable | Purpose |
-|---|---|
-| `VITE_FIREBASE_API_KEY` | Firebase web API key |
-| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase Auth domain |
-| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID |
-| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase storage bucket |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID |
-| `VITE_FIREBASE_APP_ID` | Firebase web app ID |
-| `VITE_FIREBASE_MEASUREMENT_ID` | Analytics measurement ID (may be empty) |
-| `VITE_FIREBASE_FIRESTORE_DATABASE_ID` | Named Firestore database the app reads and writes |
-| `GEMINI_API_KEY` | Optional. The AI Studio template wires it into the build, but the app doesn't use it |
+## Firebase configuration
 
-You'll find the values in Firebase console → Project settings → Your apps → Web app config. Firebase web config is bundled into the browser build by design. Access is controlled by `firestore.rules` and Firebase Auth, not by keeping the key secret.
+The app connects to Firebase using `firebase-applet-config.json` (project `gen-lang-client-0279774038`, Firestore database `ai-studio-908e4f64-…`). This web config is meant to be public: it ships in every visitor's browser. Who can change data is controlled by `firestore.rules`:
+
+- Anyone can read results.
+- Only the admin (ezrajedd@gmail.com) and timing staff listed in the `operators` collection can write. Each staff member is a document whose ID is their Google email in lowercase.
+
+Changes to `firestore.rules` take effect only after they are published in the Firebase console (Firestore → Rules → Publish).
 
 ## Commands
 
@@ -70,7 +59,7 @@ src/components/            InputConsole (operator form), ResultsDisplay (results
 src/lib/rallyUtils.ts      time parsing/formatting and total-time calculation
 src/services/firebase.ts   Firebase init, Google sign-in, error helper
 src/types.ts               data types
-firestore.rules            deployed Firestore security rules
+firestore.rules            Firestore security rules (publish in Firebase console)
 DRAFT_firestore.rules      earlier draft of the rules (not deployed)
 firebase-blueprint.json    data model description (AI Studio)
 security_spec.md           security notes (AI Studio)
