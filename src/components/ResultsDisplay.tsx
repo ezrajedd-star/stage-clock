@@ -8,7 +8,7 @@ import { Driver, Settings } from '../types';
 import { secondsToTime, formatPenalty } from '../lib/rallyUtils';
 import { ALL_STAGES, getClasses, computeClassStats, computeOverallStats, computeProcessedDrivers } from '../lib/standings';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trophy, Clock, Hash, Download, ShieldOff, Eye, List, LayoutGrid, Trash2, AlertTriangle } from 'lucide-react';
+import { Trophy, Clock, Hash, Download, ShieldOff, Eye, List, LayoutGrid, Trash2, AlertTriangle, FileText } from 'lucide-react';
 
 interface ResultsDisplayProps {
   drivers: Driver[];
@@ -33,9 +33,10 @@ interface MasterEntryListProps extends ResultsDisplayProps {
   onDeleteDriver?: (id: string) => void;
   showHidden: boolean;
   onToggleShowHidden: () => void;
+  onOpenReport?: () => void; // operators only: opens the Stage Report Writer
 }
 
-export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDriver, showHidden, onToggleShowHidden }: MasterEntryListProps) {
+export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDriver, showHidden, onToggleShowHidden, onOpenReport }: MasterEntryListProps) {
   // Phones open on the leaderboard (fits the screen); larger screens on stage times.
   const [viewMode, setViewMode] = useState<'stages' | 'leaderboard'>(() =>
     typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'leaderboard' : 'stages'
@@ -149,6 +150,16 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
             )}
           </div>
         </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+        {onOpenReport && (
+          <button
+            onClick={onOpenReport}
+            className="flex items-center gap-1.5 bg-(--accent) hover:bg-white text-black px-2 py-1 font-mono text-[8px] font-black uppercase transition-colors"
+          >
+            <FileText size={10} />
+            Report
+          </button>
+        )}
         <button 
           onClick={exportToCSV}
           className="flex items-center gap-1.5 bg-(--bg-darker) hover:bg-(--accent) text-white hover:text-black px-2 py-1 font-mono text-[8px] font-bold uppercase transition-colors border border-(--line)/40"
@@ -156,6 +167,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
           <Download size={10} />
           CSV
         </button>
+        </div>
       </div>
 
       <div className={`flex-1 overflow-auto custom-scrollbar ${viewMode === 'leaderboard' ? 'p-2 bg-(--bg-darker)' : ''}`}>
