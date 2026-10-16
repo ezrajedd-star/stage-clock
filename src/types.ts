@@ -20,6 +20,7 @@ export type RallyClass = string;
 export interface Settings {
   dnfPenalty: number; // seconds to add to slowest class time
   dnfCalculationMethod?: 'class' | 'overall'; // choice between class and overall slowest time
+  eventName?: string; // used by the Stage Report Writer
 }
 
 export enum OperationType {

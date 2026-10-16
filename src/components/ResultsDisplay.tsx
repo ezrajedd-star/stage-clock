@@ -6,6 +6,7 @@
 import React, { useState, useMemo } from 'react';
 import { Driver, Settings } from '../types';
 import { secondsToTime, formatPenalty } from '../lib/rallyUtils';
+import { ALL_STAGES, getClasses, computeClassStats, computeOverallStats, computeProcessedDrivers } from '../lib/standings';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Clock, Hash, Download, ShieldOff, Eye, List, LayoutGrid, Trash2, AlertTriangle } from 'lucide-react';
 
@@ -40,7 +41,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
     typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'leaderboard' : 'stages'
   );
   const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null);
-  const stages = Array.from({ length: 12 }, (_, i) => i + 1);
+  const stages = ALL_STAGES;
 
   // Display only: show stage columns that have at least one recorded result.
   const visibleStages = stages.filter(s => drivers.some(d => d.stageTimes?.[s.toString()] !== undefined));
@@ -49,91 +50,15 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
   // In stage view, POS / # / DRIVER stay pinned while stage columns scroll sideways.
   const pin = viewMode === 'stages';
 
-  const classes = Array.from(new Set(drivers.map(d => d.class.trim().toUpperCase()))).sort();
+  const classes = useMemo(() => getClasses(drivers), [drivers]);
 
-  // Pre-calculate class stats for highlighting and DNF substitution
-  const classStats = useMemo(() => {
-    const stats: Record<string, Record<string, { min: number; max: number }>> = {};
-    
-    classes.forEach(cls => {
-      stats[cls] = {};
-      stages.forEach(s => {
-        const stageKey = s.toString();
-        const times = drivers
-          .filter(d => d.class.trim().toUpperCase() === cls && d.stageTimes[stageKey] > 0)
-          .map(d => d.stageTimes[stageKey] + (d.stagePenalties[stageKey] || 0));
-        
-        if (times.length > 0) {
-          stats[cls][stageKey] = {
-            min: Math.min(...times),
-            max: Math.max(...times)
-          };
-        }
-      });
-    });
-    
-    return stats;
-  }, [drivers, classes, stages]);
-
-  // Pre-calculate overall stats for each stage
-  const overallStats = useMemo(() => {
-    const stats: Record<string, { min: number; max: number }> = {};
-    stages.forEach(s => {
-      const stageKey = s.toString();
-      const times = drivers
-        .filter(d => d.stageTimes[stageKey] > 0)
-        .map(d => d.stageTimes[stageKey] + (d.stagePenalties[stageKey] || 0));
-      
-      if (times.length > 0) {
-        stats[stageKey] = {
-          min: Math.min(...times),
-          max: Math.max(...times)
-        };
-      }
-    });
-    return stats;
-  }, [drivers, stages]);
-
-  // Calculate effective times per driver
-  const processedDrivers = useMemo(() => {
-    return drivers.map(d => {
-      const cls = d.class.trim().toUpperCase();
-      let effectiveTotal = 0;
-      const effectiveStageTimes: Record<string, number> = {};
-      const isDnfEntry: Record<string, boolean> = {};
-
-      stages.forEach(s => {
-        const stageKey = s.toString();
-        const time = d.stageTimes[stageKey];
-        const penalty = d.stagePenalties[stageKey] || 0;
-        
-        let effectiveTime = 0;
-        if (time > 0) {
-          effectiveTime = time + penalty;
-        } else if (time < 0) {
-          // DNF/DNS
-          const isOverall = settings.dnfCalculationMethod === 'overall';
-          const maxTime = isOverall 
-            ? (overallStats[stageKey]?.max || 0) 
-            : (classStats[cls]?.[stageKey]?.max || 0);
-          effectiveTime = maxTime + settings.dnfPenalty;
-          isDnfEntry[stageKey] = true;
-        }
-        
-        effectiveStageTimes[stageKey] = effectiveTime;
-        if (effectiveTime > 0) {
-          effectiveTotal += effectiveTime;
-        }
-      });
-
-      return {
-        ...d,
-        effectiveTotal,
-        effectiveStageTimes,
-        isDnfEntry
-      };
-    });
-  }, [drivers, classStats, overallStats, settings.dnfPenalty, settings.dnfCalculationMethod, stages]);
+  // Results calculation (class/overall stage stats, DNF substitution, effective totals) lives in lib/standings.ts.
+  const classStats = useMemo(() => computeClassStats(drivers, classes, stages), [drivers, classes]);
+  const overallStats = useMemo(() => computeOverallStats(drivers, stages), [drivers]);
+  const processedDrivers = useMemo(
+    () => computeProcessedDrivers(drivers, settings, classStats, overallStats, stages),
+    [drivers, classStats, overallStats, settings.dnfPenalty, settings.dnfCalculationMethod]
+  );
 
   const exportToCSV = () => {
     const headers = ['Pos', 'Car', 'Driver', 'Class', ...visibleStages.map(s => `SS${s}`), 'Total Time'];

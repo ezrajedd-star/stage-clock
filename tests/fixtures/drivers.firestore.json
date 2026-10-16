@@ -1,0 +1,3345 @@
+[
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_10_GROUP_2",
+  "fields": {
+   "name": {
+    "stringValue": "sham"
+   },
+   "carNumber": {
+    "stringValue": "10"
+   },
+   "class": {
+    "stringValue": "GROUP 2"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 137.41
+      },
+      "2": {
+       "doubleValue": 131.84
+      },
+      "3": {
+       "doubleValue": 245.4
+      },
+      "4": {
+       "doubleValue": 137.3
+      },
+      "5": {
+       "doubleValue": 133.24
+      },
+      "6": {
+       "doubleValue": 128.92
+      },
+      "7": {
+       "doubleValue": 127.78
+      },
+      "8": {
+       "integerValue": "-2"
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1041.89
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:52:34.818Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_11_GROUP_2",
+  "fields": {
+   "name": {
+    "stringValue": "josh"
+   },
+   "carNumber": {
+    "stringValue": "11"
+   },
+   "class": {
+    "stringValue": "GROUP 2"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 124.08
+      },
+      "2": {
+       "doubleValue": 120.64
+      },
+      "3": {
+       "doubleValue": 226.56
+      },
+      "4": {
+       "doubleValue": 134.34
+      },
+      "5": {
+       "doubleValue": 119.66
+      },
+      "6": {
+       "doubleValue": 119.61
+      },
+      "7": {
+       "doubleValue": 121.15
+      },
+      "8": {
+       "doubleValue": 120.5
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1086.54
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:41:51.101Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_13_GROUP_2",
+  "fields": {
+   "name": {
+    "stringValue": "rj"
+   },
+   "carNumber": {
+    "stringValue": "13"
+   },
+   "class": {
+    "stringValue": "GROUP 2"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 130.45
+      },
+      "2": {
+       "doubleValue": 126.88
+      },
+      "3": {
+       "doubleValue": 278.68
+      },
+      "4": {
+       "doubleValue": 141.27
+      },
+      "5": {
+       "doubleValue": 125.95
+      },
+      "6": {
+       "doubleValue": 126.19
+      },
+      "7": {
+       "doubleValue": 124.82
+      },
+      "8": {
+       "doubleValue": 120.99
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1175.23
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:52:39.716Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_14_GROUP_2",
+  "fields": {
+   "name": {
+    "stringValue": "chiquito"
+   },
+   "carNumber": {
+    "stringValue": "14"
+   },
+   "class": {
+    "stringValue": "GROUP 2"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 144.9
+      },
+      "2": {
+       "doubleValue": 128.75
+      },
+      "3": {
+       "doubleValue": 200.32
+      },
+      "4": {
+       "doubleValue": 140.3
+      },
+      "5": {
+       "doubleValue": 128.22
+      },
+      "6": {
+       "doubleValue": 127.34
+      },
+      "7": {
+       "doubleValue": 125.39
+      },
+      "8": {
+       "doubleValue": 126.34
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1121.56
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:43:10.913Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_15_GROUP_2",
+  "fields": {
+   "name": {
+    "stringValue": "jan jiffer"
+   },
+   "carNumber": {
+    "stringValue": "15"
+   },
+   "class": {
+    "stringValue": "GROUP 2"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 129.92
+      },
+      "2": {
+       "doubleValue": 128.34
+      },
+      "3": {
+       "doubleValue": 231.82
+      },
+      "4": {
+       "doubleValue": 130.16
+      },
+      "5": {
+       "doubleValue": 131.47
+      },
+      "6": {
+       "integerValue": "-1"
+      },
+      "7": {
+       "doubleValue": 134.47
+      },
+      "8": {
+       "doubleValue": 126.65
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1012.83
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:49:05.898Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_16_GROUP_2",
+  "fields": {
+   "name": {
+    "stringValue": "dodot"
+   },
+   "carNumber": {
+    "stringValue": "16"
+   },
+   "class": {
+    "stringValue": "GROUP 2"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 129.57
+      },
+      "2": {
+       "doubleValue": 131.99
+      },
+      "3": {
+       "doubleValue": 193.82
+      },
+      "4": {
+       "doubleValue": 138.19
+      },
+      "5": {
+       "doubleValue": 126.35
+      },
+      "6": {
+       "doubleValue": 121.59
+      },
+      "7": {
+       "doubleValue": 121.24
+      },
+      "8": {
+       "doubleValue": 120.46
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1083.21
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:49:36.864Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_17_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "jithin"
+   },
+   "carNumber": {
+    "stringValue": "17"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 154.23
+      },
+      "2": {
+       "doubleValue": 129.87
+      },
+      "3": {
+       "doubleValue": 173.88
+      },
+      "4": {
+       "doubleValue": 135.99
+      },
+      "5": {
+       "doubleValue": 129.69
+      },
+      "6": {
+       "doubleValue": 129.49
+      },
+      "7": {
+       "doubleValue": 127.32
+      },
+      "8": {
+       "doubleValue": 126.27
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "2"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1108.74
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:13:40.941Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_18_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "etchoy"
+   },
+   "carNumber": {
+    "stringValue": "18"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 125.92
+      },
+      "2": {
+       "doubleValue": 127.14
+      },
+      "3": {
+       "doubleValue": 178.2
+      },
+      "4": {
+       "doubleValue": 127.5
+      },
+      "5": {
+       "doubleValue": 119.53
+      },
+      "6": {
+       "doubleValue": 124.63
+      },
+      "7": {
+       "doubleValue": 125.74
+      },
+      "8": {
+       "doubleValue": 124.82
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1053.48
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:14:20.399Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_19_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "basti"
+   },
+   "carNumber": {
+    "stringValue": "19"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 136.32
+      },
+      "2": {
+       "doubleValue": 132.27
+      },
+      "3": {
+       "doubleValue": 220.42000000000002
+      },
+      "4": {
+       "doubleValue": 139.59
+      },
+      "5": {
+       "integerValue": "126"
+      },
+      "6": {
+       "doubleValue": 128.25
+      },
+      "7": {
+       "doubleValue": 125.02
+      },
+      "8": {
+       "doubleValue": 126.45
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1134.32
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:16:28.648Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_1_GROUP_1",
+  "fields": {
+   "name": {
+    "stringValue": "Mye malig"
+   },
+   "carNumber": {
+    "stringValue": "1"
+   },
+   "class": {
+    "stringValue": "GROUP 1"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 141.41
+      },
+      "2": {
+       "doubleValue": 138.06
+      },
+      "3": {
+       "doubleValue": 243.75
+      },
+      "4": {
+       "doubleValue": 149.04
+      },
+      "5": {
+       "doubleValue": 141.03
+      },
+      "6": {
+       "doubleValue": 192.59
+      },
+      "7": {
+       "doubleValue": 134.04
+      },
+      "8": {
+       "doubleValue": 130.08
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "integerValue": "1270"
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:11:53.410Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_20_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "jam"
+   },
+   "carNumber": {
+    "stringValue": "20"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 128.09
+      },
+      "2": {
+       "doubleValue": 126.2
+      },
+      "3": {
+       "doubleValue": 199.23
+      },
+      "4": {
+       "doubleValue": 132.43
+      },
+      "5": {
+       "doubleValue": 126.07
+      },
+      "6": {
+       "doubleValue": 123.98
+      },
+      "7": {
+       "doubleValue": 124.36
+      },
+      "8": {
+       "doubleValue": 127.86
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1088.22
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:17:17.006Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_21_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "brian"
+   },
+   "carNumber": {
+    "stringValue": "21"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 127.87
+      },
+      "2": {
+       "doubleValue": 126.1
+      },
+      "3": {
+       "doubleValue": 185.65
+      },
+      "4": {
+       "doubleValue": 129.88
+      },
+      "5": {
+       "doubleValue": 130.56
+      },
+      "6": {
+       "doubleValue": 124.56
+      },
+      "7": {
+       "doubleValue": 126.73
+      },
+      "8": {
+       "integerValue": "-2"
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 951.3499999999999
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T10:08:57.516Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_22_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "zoilo"
+   },
+   "carNumber": {
+    "stringValue": "22"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 129.13
+      },
+      "2": {
+       "doubleValue": 134.17
+      },
+      "3": {
+       "doubleValue": 159.31
+      },
+      "4": {
+       "doubleValue": 127.04
+      },
+      "5": {
+       "doubleValue": 124.76
+      },
+      "6": {
+       "doubleValue": 125.71
+      },
+      "7": {
+       "doubleValue": 127.76
+      },
+      "8": {
+       "doubleValue": 124.05
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1051.93
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:18:20.893Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_23_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "khalil"
+   },
+   "carNumber": {
+    "stringValue": "23"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 123.84
+      },
+      "2": {
+       "doubleValue": 120.42
+      },
+      "3": {
+       "doubleValue": 213.75
+      },
+      "4": {
+       "doubleValue": 136.64
+      },
+      "5": {
+       "doubleValue": 120.31
+      },
+      "6": {
+       "doubleValue": 117.9
+      },
+      "7": {
+       "doubleValue": 117.07
+      },
+      "8": {
+       "doubleValue": 118.25
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1068.18
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:19:02.443Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_24_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "jules"
+   },
+   "carNumber": {
+    "stringValue": "24"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 126.24
+      },
+      "2": {
+       "doubleValue": 136.82
+      },
+      "3": {
+       "doubleValue": 152.99
+      },
+      "4": {
+       "doubleValue": 130.05
+      },
+      "5": {
+       "doubleValue": 125.11
+      },
+      "6": {
+       "doubleValue": 121.46
+      },
+      "7": {
+       "doubleValue": 121.77
+      },
+      "8": {
+       "doubleValue": 120.13
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1034.5700000000002
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:19:56.058Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_25_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "win win"
+   },
+   "carNumber": {
+    "stringValue": "25"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 121.61
+      },
+      "2": {
+       "doubleValue": 123.06
+      },
+      "3": {
+       "doubleValue": 159.68
+      },
+      "4": {
+       "doubleValue": 127.51
+      },
+      "5": {
+       "doubleValue": 119.97
+      },
+      "6": {
+       "doubleValue": 121.15
+      },
+      "7": {
+       "doubleValue": 120.44
+      },
+      "8": {
+       "doubleValue": 121.76
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1015.1800000000001
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:20:24.675Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_26_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "francis"
+   },
+   "carNumber": {
+    "stringValue": "26"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 129.88
+      },
+      "2": {
+       "doubleValue": 169.73
+      },
+      "3": {
+       "doubleValue": 170.72
+      },
+      "4": {
+       "doubleValue": 129.46
+      },
+      "5": {
+       "doubleValue": 127.85
+      },
+      "6": {
+       "doubleValue": 121.43
+      },
+      "7": {
+       "doubleValue": 122.02
+      },
+      "8": {
+       "doubleValue": 125.86
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1096.95
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:21:56.080Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_27_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "rex"
+   },
+   "carNumber": {
+    "stringValue": "27"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 132.5
+      },
+      "2": {
+       "doubleValue": 133.98
+      },
+      "3": {
+       "doubleValue": 210.32999999999998
+      },
+      "4": {
+       "doubleValue": 135.23
+      },
+      "5": {
+       "integerValue": "-2"
+      },
+      "6": {
+       "doubleValue": 123.13
+      },
+      "7": {
+       "doubleValue": 123.35
+      },
+      "8": {
+       "doubleValue": 125.3
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 983.8199999999999
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T10:10:19.097Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_28_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "paulo"
+   },
+   "carNumber": {
+    "stringValue": "28"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 136.93
+      },
+      "2": {
+       "doubleValue": 130.27
+      },
+      "3": {
+       "doubleValue": 177.48
+      },
+      "4": {
+       "doubleValue": 135.98
+      },
+      "5": {
+       "doubleValue": 152.45
+      },
+      "6": {
+       "doubleValue": 131.42
+      },
+      "7": {
+       "doubleValue": 127.88
+      },
+      "8": {
+       "doubleValue": 128.32
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1120.73
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:22:52.382Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_29_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "leo"
+   },
+   "carNumber": {
+    "stringValue": "29"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "-2"
+      },
+      "2": {
+       "doubleValue": 148.28
+      },
+      "3": {
+       "integerValue": "-1"
+      },
+      "4": {
+       "integerValue": "-1"
+      },
+      "5": {
+       "integerValue": "-2"
+      },
+      "6": {
+       "doubleValue": 139.2
+      },
+      "7": {
+       "doubleValue": 136.35
+      },
+      "8": {
+       "doubleValue": 134.32
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 558.1500000000001
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T10:11:06.256Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_2_GROUP_1",
+  "fields": {
+   "name": {
+    "stringValue": "caloy ramirez"
+   },
+   "carNumber": {
+    "stringValue": "2"
+   },
+   "class": {
+    "stringValue": "GROUP 1"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 169.71
+      },
+      "2": {
+       "doubleValue": 136.93
+      },
+      "3": {
+       "doubleValue": 139.19
+      },
+      "4": {
+       "doubleValue": 162.73
+      },
+      "5": {
+       "doubleValue": 134.35
+      },
+      "6": {
+       "doubleValue": 133.76
+      },
+      "7": {
+       "doubleValue": 132.55
+      },
+      "8": {
+       "doubleValue": 132.37
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1141.5900000000001
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:00:38.906Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_30_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "jether"
+   },
+   "carNumber": {
+    "stringValue": "30"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 134.53
+      },
+      "2": {
+       "doubleValue": 139.82
+      },
+      "3": {
+       "doubleValue": 217.28
+      },
+      "4": {
+       "doubleValue": 127.83
+      },
+      "5": {
+       "doubleValue": 124.07
+      },
+      "6": {
+       "doubleValue": 127.86
+      },
+      "7": {
+       "integerValue": "-1"
+      },
+      "8": {
+       "integerValue": "-2"
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 871.39
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T10:10:55.760Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_31_GROUP_4",
+  "fields": {
+   "name": {
+    "stringValue": "vm locsin"
+   },
+   "carNumber": {
+    "stringValue": "31"
+   },
+   "class": {
+    "stringValue": "GROUP 4"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 119.02000000000001
+      },
+      "2": {
+       "doubleValue": 121.31
+      },
+      "3": {
+       "doubleValue": 162.69
+      },
+      "4": {
+       "doubleValue": 118.18
+      },
+      "5": {
+       "doubleValue": 118.91
+      },
+      "6": {
+       "doubleValue": 117.64
+      },
+      "7": {
+       "doubleValue": 115.11
+      },
+      "8": {
+       "doubleValue": 118.27000000000001
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 991.13
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:32:57.572Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_32_GROUP_4",
+  "fields": {
+   "name": {
+    "stringValue": "Dennis"
+   },
+   "carNumber": {
+    "stringValue": "32"
+   },
+   "class": {
+    "stringValue": "GROUP 4"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 125.96
+      },
+      "2": {
+       "doubleValue": 125.69
+      },
+      "3": {
+       "doubleValue": 144.89
+      },
+      "4": {
+       "doubleValue": 126.63
+      },
+      "5": {
+       "doubleValue": 126.77
+      },
+      "6": {
+       "doubleValue": 126.16
+      },
+      "7": {
+       "doubleValue": 127.09
+      },
+      "8": {
+       "doubleValue": 122.89
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1026.08
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:34:13.246Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_33_GROUP_4",
+  "fields": {
+   "name": {
+    "stringValue": "timoy"
+   },
+   "carNumber": {
+    "stringValue": "33"
+   },
+   "class": {
+    "stringValue": "GROUP 4"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 146.9
+      },
+      "2": {
+       "doubleValue": 143.44
+      },
+      "3": {
+       "doubleValue": 154.34
+      },
+      "4": {
+       "doubleValue": 144.68
+      },
+      "5": {
+       "doubleValue": 150.67000000000002
+      },
+      "6": {
+       "doubleValue": 136.32
+      },
+      "7": {
+       "doubleValue": 136.69
+      },
+      "8": {
+       "doubleValue": 136.56
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1149.6000000000001
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:34:57.208Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_34_GROUP_4",
+  "fields": {
+   "name": {
+    "stringValue": "mark"
+   },
+   "carNumber": {
+    "stringValue": "34"
+   },
+   "class": {
+    "stringValue": "GROUP 4"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "123"
+      },
+      "2": {
+       "doubleValue": 120.68
+      },
+      "3": {
+       "doubleValue": 151.46
+      },
+      "4": {
+       "doubleValue": 122.89
+      },
+      "5": {
+       "doubleValue": 116.66
+      },
+      "6": {
+       "doubleValue": 117.85
+      },
+      "7": {
+       "doubleValue": 116.94
+      },
+      "8": {
+       "doubleValue": 116.24000000000001
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 985.72
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:36:17.213Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_35_GROUP_4",
+  "fields": {
+   "name": {
+    "stringValue": "macky"
+   },
+   "carNumber": {
+    "stringValue": "35"
+   },
+   "class": {
+    "stringValue": "GROUP 4"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 119.12
+      },
+      "2": {
+       "integerValue": "-1"
+      },
+      "3": {
+       "doubleValue": 140.02
+      },
+      "4": {
+       "doubleValue": 118.99000000000001
+      },
+      "5": {
+       "doubleValue": 115.89
+      },
+      "6": {
+       "doubleValue": 116.86
+      },
+      "7": {
+       "doubleValue": 116.65
+      },
+      "8": {
+       "doubleValue": 116.25999999999999
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 843.79
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:37:13.278Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_36_GROUP_4",
+  "fields": {
+   "name": {
+    "stringValue": "figo"
+   },
+   "carNumber": {
+    "stringValue": "36"
+   },
+   "class": {
+    "stringValue": "GROUP 4"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 122.35
+      },
+      "2": {
+       "doubleValue": 122.07
+      },
+      "3": {
+       "doubleValue": 141.66
+      },
+      "4": {
+       "doubleValue": 123.95
+      },
+      "5": {
+       "doubleValue": 120.46
+      },
+      "6": {
+       "doubleValue": 120.5
+      },
+      "7": {
+       "doubleValue": 121.08
+      },
+      "8": {
+       "doubleValue": 121.8
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 993.87
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:37:47.603Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_37_GROUP_4",
+  "fields": {
+   "name": {
+    "stringValue": "jong"
+   },
+   "carNumber": {
+    "stringValue": "37"
+   },
+   "class": {
+    "stringValue": "GROUP 4"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 116.03
+      },
+      "2": {
+       "doubleValue": 117.69
+      },
+      "3": {
+       "doubleValue": 144.55
+      },
+      "4": {
+       "doubleValue": 118.97999999999999
+      },
+      "5": {
+       "doubleValue": 118.05
+      },
+      "6": {
+       "doubleValue": 114.05
+      },
+      "7": {
+       "doubleValue": 114.93
+      },
+      "8": {
+       "doubleValue": 114.87
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 959.15
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:38:25.607Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_38_GROUP_4",
+  "fields": {
+   "name": {
+    "stringValue": "lance"
+   },
+   "carNumber": {
+    "stringValue": "38"
+   },
+   "class": {
+    "stringValue": "GROUP 4"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 125.62
+      },
+      "2": {
+       "doubleValue": 124.2
+      },
+      "3": {
+       "doubleValue": 148.19
+      },
+      "4": {
+       "doubleValue": 118.7
+      },
+      "5": {
+       "doubleValue": 116.83
+      },
+      "6": {
+       "doubleValue": 115.25
+      },
+      "7": {
+       "integerValue": "116"
+      },
+      "8": {
+       "doubleValue": 114.45
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 979.2400000000001
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:38:56.329Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_3_GROUP_1",
+  "fields": {
+   "name": {
+    "stringValue": "koy koy"
+   },
+   "carNumber": {
+    "stringValue": "3"
+   },
+   "class": {
+    "stringValue": "GROUP 1"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 184.73
+      },
+      "2": {
+       "doubleValue": 151.56
+      },
+      "3": {
+       "integerValue": "-2"
+      },
+      "4": {
+       "doubleValue": 167.18
+      },
+      "5": {
+       "doubleValue": 152.04
+      },
+      "6": {
+       "doubleValue": 137.01
+      },
+      "7": {
+       "doubleValue": 138.61
+      },
+      "8": {
+       "integerValue": "-2"
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 931.13
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:50:09.732Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_4_GROUP_1",
+  "fields": {
+   "name": {
+    "stringValue": "jay jay"
+   },
+   "carNumber": {
+    "stringValue": "4"
+   },
+   "class": {
+    "stringValue": "GROUP 1"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 132.06
+      },
+      "2": {
+       "doubleValue": 132.18
+      },
+      "3": {
+       "doubleValue": 132.58
+      },
+      "4": {
+       "integerValue": "-1"
+      },
+      "5": {
+       "doubleValue": 129.05
+      },
+      "6": {
+       "doubleValue": 125.43
+      },
+      "7": {
+       "doubleValue": 125.12
+      },
+      "8": {
+       "doubleValue": 126.03
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 902.4500000000002
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:51:49.576Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_56_GROUP_1",
+  "fields": {
+   "name": {
+    "stringValue": "Ralph"
+   },
+   "carNumber": {
+    "stringValue": "56"
+   },
+   "class": {
+    "stringValue": "GROUP 1"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "120"
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "integerValue": "120"
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-10-15T14:20:00.060Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_5_GROUP_1",
+  "fields": {
+   "name": {
+    "stringValue": "pm"
+   },
+   "carNumber": {
+    "stringValue": "5"
+   },
+   "class": {
+    "stringValue": "GROUP 1"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 137.24
+      },
+      "2": {
+       "doubleValue": 132.69
+      },
+      "3": {
+       "integerValue": "130"
+      },
+      "4": {
+       "doubleValue": 154.31
+      },
+      "5": {
+       "doubleValue": 127.4
+      },
+      "6": {
+       "doubleValue": 147.29
+      },
+      "7": {
+       "doubleValue": 128.47
+      },
+      "8": {
+       "integerValue": "-2"
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 957.4
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:05:46.360Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_6_GROUP_1",
+  "fields": {
+   "name": {
+    "stringValue": "choy"
+   },
+   "carNumber": {
+    "stringValue": "6"
+   },
+   "class": {
+    "stringValue": "GROUP 1"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 166.17000000000002
+      },
+      "2": {
+       "integerValue": "-1"
+      },
+      "3": {
+       "doubleValue": 155.32999999999998
+      },
+      "4": {
+       "doubleValue": 176.72
+      },
+      "5": {
+       "doubleValue": 157.2
+      },
+      "6": {
+       "doubleValue": 136.74
+      },
+      "7": {
+       "doubleValue": 140.75
+      },
+      "8": {
+       "doubleValue": 133.26
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1066.17
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:06:58.590Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_7_GROUP_1",
+  "fields": {
+   "name": {
+    "stringValue": "kim"
+   },
+   "carNumber": {
+    "stringValue": "7"
+   },
+   "class": {
+    "stringValue": "GROUP 1"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 135.99
+      },
+      "2": {
+       "doubleValue": 130.99
+      },
+      "3": {
+       "doubleValue": 130.51
+      },
+      "4": {
+       "doubleValue": 140.04
+      },
+      "5": {
+       "doubleValue": 131.48
+      },
+      "6": {
+       "doubleValue": 129.69
+      },
+      "7": {
+       "doubleValue": 130.45
+      },
+      "8": {
+       "integerValue": "-2"
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 929.1500000000001
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:07:41.452Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_8_GROUP_1",
+  "fields": {
+   "name": {
+    "stringValue": "ting tong"
+   },
+   "carNumber": {
+    "stringValue": "8"
+   },
+   "class": {
+    "stringValue": "GROUP 1"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "doubleValue": 128.69
+      },
+      "2": {
+       "doubleValue": 125.52
+      },
+      "3": {
+       "doubleValue": 129.35
+      },
+      "4": {
+       "doubleValue": 146.32
+      },
+      "5": {
+       "doubleValue": 122.99
+      },
+      "6": {
+       "doubleValue": 124.34
+      },
+      "7": {
+       "doubleValue": 127.78
+      },
+      "8": {
+       "doubleValue": 125.42
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1030.4099999999999
+   },
+   "isHidden": {
+    "booleanValue": false
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:09:56.224Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_96_GROUP_1",
+  "fields": {
+   "name": {
+    "stringValue": "gone"
+   },
+   "carNumber": {
+    "stringValue": "96"
+   },
+   "class": {
+    "stringValue": "GROUP 1"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "-2"
+      },
+      "2": {
+       "integerValue": "-2"
+      },
+      "3": {
+       "integerValue": "-2"
+      },
+      "4": {
+       "integerValue": "-2"
+      },
+      "5": {
+       "doubleValue": 134.05
+      },
+      "6": {
+       "doubleValue": 135.82
+      },
+      "7": {
+       "doubleValue": 138.9
+      },
+      "8": {
+       "doubleValue": 136.64
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 545.41
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:49:42.768Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_98_GROUP_4",
+  "fields": {
+   "name": {
+    "stringValue": "NIco"
+   },
+   "carNumber": {
+    "stringValue": "98"
+   },
+   "class": {
+    "stringValue": "GROUP 4"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "-1"
+      },
+      "2": {
+       "integerValue": "-1"
+      },
+      "3": {
+       "integerValue": "-1"
+      },
+      "4": {
+       "integerValue": "-1"
+      },
+      "5": {
+       "integerValue": "-1"
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "integerValue": "0"
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T08:39:07.693Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_99_GROUP_3",
+  "fields": {
+   "name": {
+    "stringValue": "peter"
+   },
+   "carNumber": {
+    "stringValue": "99"
+   },
+   "class": {
+    "stringValue": "GROUP 3"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "-2"
+      },
+      "2": {
+       "integerValue": "-2"
+      },
+      "3": {
+       "integerValue": "-2"
+      },
+      "4": {
+       "integerValue": "-2"
+      },
+      "5": {
+       "doubleValue": 142.9
+      },
+      "6": {
+       "doubleValue": 134.28
+      },
+      "7": {
+       "doubleValue": 133.86
+      },
+      "8": {
+       "doubleValue": 128.99
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 540.03
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T10:11:10.847Z"
+   }
+  }
+ },
+ {
+  "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/drivers/driver_9_GROUP_1",
+  "fields": {
+   "name": {
+    "stringValue": "carissa"
+   },
+   "carNumber": {
+    "stringValue": "9"
+   },
+   "class": {
+    "stringValue": "GROUP 1"
+   },
+   "stageTimes": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "-2"
+      },
+      "2": {
+       "integerValue": "-1"
+      },
+      "3": {
+       "doubleValue": 365.04
+      },
+      "4": {
+       "doubleValue": 191.52
+      },
+      "5": {
+       "doubleValue": 173.73
+      },
+      "6": {
+       "doubleValue": 148.02
+      },
+      "7": {
+       "doubleValue": 152.92000000000002
+      },
+      "8": {
+       "doubleValue": 154.15
+      }
+     }
+    }
+   },
+   "stagePenalties": {
+    "mapValue": {
+     "fields": {
+      "1": {
+       "integerValue": "0"
+      },
+      "2": {
+       "integerValue": "0"
+      },
+      "3": {
+       "integerValue": "0"
+      },
+      "4": {
+       "integerValue": "0"
+      },
+      "5": {
+       "integerValue": "0"
+      },
+      "6": {
+       "integerValue": "0"
+      },
+      "7": {
+       "integerValue": "0"
+      },
+      "8": {
+       "integerValue": "0"
+      }
+     }
+    }
+   },
+   "totalTimeSeconds": {
+    "doubleValue": 1185.38
+   },
+   "isHidden": {
+    "booleanValue": true
+   },
+   "updatedAt": {
+    "timestampValue": "2026-06-21T09:52:00.819Z"
+   }
+  }
+ }
+]
