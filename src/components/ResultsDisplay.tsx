@@ -41,6 +41,9 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
     typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'leaderboard' : 'stages'
   );
   const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null);
+  // Leaderboard can rank within each class (default) or across all classes.
+  const [leaderboardScope, setLeaderboardScope] = useState<'class' | 'overall'>('class');
+  const isOverall = viewMode === 'leaderboard' && leaderboardScope === 'overall';
   const stages = ALL_STAGES;
 
   // Display only: show stage columns that have at least one recorded result.
@@ -131,6 +134,19 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
             >
               <List size={10} /> Leaderboard
             </button>
+            {viewMode === 'leaderboard' && (
+              <div className="flex items-center">
+                {(['class', 'overall'] as const).map(scope => (
+                  <button
+                    key={scope}
+                    onClick={() => setLeaderboardScope(scope)}
+                    className={`text-[8px] px-1.5 py-0.5 border ${leaderboardScope === scope ? 'bg-white text-black border-white' : 'text-(--text-secondary) border-(--line)'} uppercase font-bold transition-all`}
+                  >
+                    {scope === 'class' ? 'By Class' : 'Overall'}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         <button 
@@ -143,10 +159,10 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
       </div>
 
       <div className={`flex-1 overflow-auto custom-scrollbar ${viewMode === 'leaderboard' ? 'p-2 bg-(--bg-darker)' : ''}`}>
-        <div className={viewMode === 'leaderboard' ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 h-max' : ''}>
-          {classes.map(className => {
+        <div className={isOverall ? 'grid grid-cols-1 max-w-3xl mx-auto gap-2 h-max' : viewMode === 'leaderboard' ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 h-max' : ''}>
+          {(isOverall ? ['OVERALL'] : classes).map(className => {
             const classDrivers = processedDrivers
-              .filter(d => d.class.trim().toUpperCase() === className && (showHidden || !d.isHidden))
+              .filter(d => (isOverall || d.class.trim().toUpperCase() === className) && (showHidden || !d.isHidden))
               .sort((a, b) => a.effectiveTotal - b.effectiveTotal);
 
             if (classDrivers.length === 0) return null;
@@ -157,7 +173,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
               <div key={className} className={`mb-4 last:mb-0 ${viewMode === 'leaderboard' ? 'border border-(--line) bg-(--bg-panel) h-fit flex flex-col' : 'min-w-full w-max'}`}>
                 <div className={`sticky top-0 z-10 bg-(--bg-header) border-y border-(--line) px-4 py-1 flex items-center justify-between ${viewMode === 'leaderboard' ? 'border-t-0' : ''}`}>
                   <span className="sticky left-4 text-[9px] font-black text-(--accent) uppercase tracking-[0.2em] italic">
-                     {className} • CLASS GROUPING
+                     {isOverall ? 'OVERALL • ALL CLASSES' : `${className} • CLASS GROUPING`}
                   </span>
                 </div>
                 <table className="w-full text-left border-collapse font-mono text-[10px]">
@@ -234,6 +250,9 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                             </td>
                             <td className={`px-2 sm:px-3 py-0.5 min-w-0 ${pin ? 'sticky left-22 z-[1] bg-inherit w-28 min-w-28 max-w-28 border-r border-(--line)/30' : ''}`}>
                               <div className="font-black text-white uppercase text-[10px] leading-tight tabular-nums truncate max-w-[100px]" title={d.name}>{d.name}</div>
+                              {isOverall && (
+                                <div className="text-[8px] font-bold uppercase tracking-wider text-(--text-secondary) leading-tight">{d.class}</div>
+                              )}
                               {viewMode === 'leaderboard' && dnfDnsCount > 0 && (
                                 <div className="flex gap-0.5 mt-0.5">
                                   {Array.from({ length: dnfDnsCount }).map((_, i) => (
