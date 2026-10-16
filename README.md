@@ -1,6 +1,6 @@
 # Stage Clock
 
-Stage Clock is a rally timing and results app for events of up to 12 special stages. Timing operators sign in with Google and use the input terminal to enter each car's stage time (MM:SS.SS or H:MM:SS.SS), penalties and DNF/DNS results. The results board updates live for every viewer. It shows stage times grouped by class with the fastest and slowest highlighted, and a per-class leaderboard with gaps to the leader. DNF/DNS results are replaced with the slowest time in the class (or overall) plus a configurable penalty. Operators can disqualify (hide/show) entries and export the results to CSV. Data is stored in Cloud Firestore, and the app can be installed as a PWA.
+Stage Clock is a rally timing and results app for events of up to 12 special stages. Timing operators sign in with Google and use the input terminal to enter each car's stage time (MM:SS.SS or H:MM:SS.SS), penalties and DNF/DNS results. The results board updates live for every viewer. It shows stage times grouped by class with the fastest and slowest highlighted, and a leaderboard (by class or overall) with gaps to the leader. DNF/DNS results are replaced with the slowest time in the class (or overall) plus a configurable penalty. Operators can disqualify (hide/show) entries, export the results to CSV, and draft stage reports with the Stage Report Writer. Data is stored in Cloud Firestore, and the app can be installed as a PWA.
 
 Originally built in Google AI Studio.
 
@@ -17,17 +17,37 @@ Originally built in Google AI Studio.
    npm install
    ```
 
-2. Start the dev server:
+2. Optional, for the Stage Report Writer: create `.env.local` (git-ignored) from `.env.example` and set `ANTHROPIC_API_KEY`.
+
+3. Start the dev server:
 
    ```sh
    npm run dev
    ```
 
-   The app runs at http://localhost:3000.
+   The app runs at http://localhost:3000. The dev server also serves `/api/stage-report`.
 
 ## Deployment
 
-The site is hosted on Vercel at https://stage-clock-rho.vercel.app/. Every push to `main` on GitHub rebuilds and redeploys it automatically. No environment variables are needed.
+The site is hosted on Vercel at https://stage-clock-rho.vercel.app/. Every push to `main` on GitHub rebuilds and redeploys it automatically; other branches get preview deployments.
+
+## Environment variables
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Vercel → Project → Settings → Environment Variables (all environments); `.env.local` for local dev | Claude API key for the Stage Report Writer. Read only by the server function, never sent to the browser. Never commit a real key. |
+
+## Stage Report Writer
+
+Operators get a **Report** button in the results toolbar. Pick a stage, the format (Stage summary or Social post), optionally add notes (for example "car 7 puncture at km 4"), and generate. The draft can be edited, copied and regenerated.
+
+How accuracy is protected:
+
+1. **Fact sheet in code** (`src/lib/factSheet.ts`): stage results, class and overall standings, gaps, position changes, ties, penalties, DNF/DNS, crews still awaiting a time, and rule-based storylines are computed from the same calculation the board uses (`src/lib/standings.ts`), with times formatted exactly as the board shows them.
+2. **Claude writes the prose** (`api/stage-report.ts` → `src/server/stageReport.ts`) from the fact sheet and the operator's notes only. The model is set by `REPORT_MODEL` in `src/lib/reportConfig.ts` (default `claude-sonnet-5-5`; for example `claude-haiku-5-5` costs less). The system prompt is in `src/lib/reportPrompt.ts`.
+3. **Number check** (`src/lib/verifyDraft.ts`): every time, gap, penalty, position, place count and car number in the draft is checked against the fact sheet, and crew names must sit next to their own car number. On a mismatch the server regenerates once with the list of problems. If it still fails, the panel shows the draft as **Not verified** with the problem items highlighted. Edits are re-checked live.
+
+The endpoint only answers signed-in operators (the admin or emails in `operators`), reads the results from Firestore itself, and returns clear errors for a missing or invalid key, rate limits, network failures and stages without results. New formats can be added in `REPORT_FORMATS` (`src/lib/reportConfig.ts`).
 
 ## Firebase configuration
 
@@ -46,6 +66,7 @@ Changes to `firestore.rules` take effect only after they are published in the Fi
 | `npm run build` | Production build into `dist/` |
 | `npm run preview` | Serve the production build locally |
 | `npm run lint` | Type-check with `tsc --noEmit` |
+| `npm test` | Unit tests (Vitest): results calculation, fact sheet, number check, report endpoint |
 | `npm run clean` | Delete `dist/` |
 
 ## Project layout
@@ -55,8 +76,16 @@ index.html                 entry HTML
 vite.config.ts             Vite + React + Tailwind + PWA config
 src/main.tsx               React entry
 src/App.tsx                layout, auth, Firestore listeners, write logic
-src/components/            InputConsole (operator form), ResultsDisplay (results board)
+src/components/            InputConsole (operator form), ResultsDisplay (results board), ReportPanel (report writer)
 src/lib/rallyUtils.ts      time parsing/formatting and total-time calculation
+src/lib/standings.ts       results calculation shared by the board and the report writer
+src/lib/factSheet.ts       stage fact sheet for reports
+src/lib/verifyDraft.ts     number check for generated reports
+src/lib/reportConfig.ts    report model, formats, error messages
+src/lib/reportPrompt.ts    report system prompt and messages
+src/server/stageReport.ts  report endpoint logic (auth, data, Claude, check)
+api/stage-report.ts        Vercel Function entry for POST /api/stage-report
+tests/                     Vitest tests and a snapshot of real event data
 src/services/firebase.ts   Firebase init, Google sign-in, error helper
 src/types.ts               data types
 firestore.rules            Firestore security rules (publish in Firebase console)
