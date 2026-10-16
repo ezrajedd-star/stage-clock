@@ -12,10 +12,12 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
     "@fontsource/titillium-web": "^5.3.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
     "firebase": "^12.12.1",
+    "jose": "^6.2.12",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "react": "^19.0.1",

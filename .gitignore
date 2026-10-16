@@ -22,3 +22,6 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Vercel local build output
+.vercel/
