@@ -20,6 +20,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { Driver, OperationType, Settings } from './types';
 import { timeToSeconds, calculateTotalTime } from './lib/rallyUtils';
 import InputConsole from './components/InputConsole';
+import ReportPanel from './components/ReportPanel';
 import { MasterEntryList, ClassStandings } from './components/ResultsDisplay';
 import { motion } from 'motion/react';
 import { Activity, LogIn, Trophy, Timer, Shield, Settings as SettingsIcon } from 'lucide-react';
@@ -36,6 +37,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [showHidden, setShowHidden] = useState(false);
   const [isOperator, setIsOperator] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   // Operators (admin or listed in /operators) get the input terminal and row controls.
   useEffect(() => {
@@ -74,7 +76,8 @@ export default function App() {
         const data = snapshot.data();
         setSettings({
           dnfPenalty: data.dnfPenalty ?? 60,
-          dnfCalculationMethod: data.dnfCalculationMethod ?? 'class'
+          dnfCalculationMethod: data.dnfCalculationMethod ?? 'class',
+          eventName: typeof data.eventName === 'string' ? data.eventName : undefined
         });
       } else if (user) {
         // Init default settings if they don't exist, only if user is signed in
@@ -288,6 +291,7 @@ export default function App() {
                 onToggleShowHidden={() => setShowHidden(!showHidden)}
                 onToggleHidden={isOperator ? handleToggleHidden : undefined}
                 onDeleteDriver={isOperator ? handleDeleteDriver : undefined}
+                onOpenReport={isOperator ? () => setShowReport(true) : undefined}
               />
             </div>
           </section>
@@ -322,6 +326,17 @@ export default function App() {
           </aside>
         )}
       </main>
+
+      {/* Stage Report Writer (operators only) */}
+      {user && isOperator && showReport && (
+        <ReportPanel
+          drivers={drivers}
+          settings={settings}
+          getIdToken={async () => (auth.currentUser ? auth.currentUser.getIdToken() : null)}
+          onSaveEventName={name => { handleUpdateSettings({ eventName: name }).catch(() => { /* shown via the [FAULT] message */ }); }}
+          onClose={() => setShowReport(false)}
+        />
+      )}
 
       {/* Footer */}
       <footer className="min-h-10 py-2 md:py-0 bg-(--bg-deep) border-t border-(--line) px-3 md:px-6 flex items-center justify-between text-[9px] md:text-[10px] text-(--text-subtle) uppercase tracking-widest font-bold shrink-0">

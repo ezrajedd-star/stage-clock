@@ -1,0 +1,11 @@
+{
+ "name": "projects/gen-lang-client-0279774038/databases/ai-studio-908e4f64-e003-435a-80ae-32d2f71bac07/documents/settings/global",
+ "fields": {
+  "dnfCalculationMethod": {
+   "stringValue": "class"
+  },
+  "dnfPenalty": {
+   "integerValue": "5"
+  }
+ }
+}

@@ -6,8 +6,9 @@
 import React, { useState, useMemo } from 'react';
 import { Driver, Settings } from '../types';
 import { secondsToTime, formatPenalty } from '../lib/rallyUtils';
+import { ALL_STAGES, getClasses, computeClassStats, computeOverallStats, computeProcessedDrivers } from '../lib/standings';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trophy, Clock, Hash, Download, ShieldOff, Eye, List, LayoutGrid, Trash2, AlertTriangle } from 'lucide-react';
+import { Trophy, Clock, Hash, Download, ShieldOff, Eye, List, LayoutGrid, Trash2, AlertTriangle, FileText } from 'lucide-react';
 
 interface ResultsDisplayProps {
   drivers: Driver[];
@@ -32,15 +33,19 @@ interface MasterEntryListProps extends ResultsDisplayProps {
   onDeleteDriver?: (id: string) => void;
   showHidden: boolean;
   onToggleShowHidden: () => void;
+  onOpenReport?: () => void; // operators only: opens the Stage Report Writer
 }
 
-export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDriver, showHidden, onToggleShowHidden }: MasterEntryListProps) {
+export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDriver, showHidden, onToggleShowHidden, onOpenReport }: MasterEntryListProps) {
   // Phones open on the leaderboard (fits the screen); larger screens on stage times.
   const [viewMode, setViewMode] = useState<'stages' | 'leaderboard'>(() =>
     typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 'leaderboard' : 'stages'
   );
   const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null);
-  const stages = Array.from({ length: 12 }, (_, i) => i + 1);
+  // Leaderboard can rank within each class (default) or across all classes.
+  const [leaderboardScope, setLeaderboardScope] = useState<'class' | 'overall'>('class');
+  const isOverall = viewMode === 'leaderboard' && leaderboardScope === 'overall';
+  const stages = ALL_STAGES;
 
   // Display only: show stage columns that have at least one recorded result.
   const visibleStages = stages.filter(s => drivers.some(d => d.stageTimes?.[s.toString()] !== undefined));
@@ -49,91 +54,15 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
   // In stage view, POS / # / DRIVER stay pinned while stage columns scroll sideways.
   const pin = viewMode === 'stages';
 
-  const classes = Array.from(new Set(drivers.map(d => d.class.trim().toUpperCase()))).sort();
+  const classes = useMemo(() => getClasses(drivers), [drivers]);
 
-  // Pre-calculate class stats for highlighting and DNF substitution
-  const classStats = useMemo(() => {
-    const stats: Record<string, Record<string, { min: number; max: number }>> = {};
-    
-    classes.forEach(cls => {
-      stats[cls] = {};
-      stages.forEach(s => {
-        const stageKey = s.toString();
-        const times = drivers
-          .filter(d => d.class.trim().toUpperCase() === cls && d.stageTimes[stageKey] > 0)
-          .map(d => d.stageTimes[stageKey] + (d.stagePenalties[stageKey] || 0));
-        
-        if (times.length > 0) {
-          stats[cls][stageKey] = {
-            min: Math.min(...times),
-            max: Math.max(...times)
-          };
-        }
-      });
-    });
-    
-    return stats;
-  }, [drivers, classes, stages]);
-
-  // Pre-calculate overall stats for each stage
-  const overallStats = useMemo(() => {
-    const stats: Record<string, { min: number; max: number }> = {};
-    stages.forEach(s => {
-      const stageKey = s.toString();
-      const times = drivers
-        .filter(d => d.stageTimes[stageKey] > 0)
-        .map(d => d.stageTimes[stageKey] + (d.stagePenalties[stageKey] || 0));
-      
-      if (times.length > 0) {
-        stats[stageKey] = {
-          min: Math.min(...times),
-          max: Math.max(...times)
-        };
-      }
-    });
-    return stats;
-  }, [drivers, stages]);
-
-  // Calculate effective times per driver
-  const processedDrivers = useMemo(() => {
-    return drivers.map(d => {
-      const cls = d.class.trim().toUpperCase();
-      let effectiveTotal = 0;
-      const effectiveStageTimes: Record<string, number> = {};
-      const isDnfEntry: Record<string, boolean> = {};
-
-      stages.forEach(s => {
-        const stageKey = s.toString();
-        const time = d.stageTimes[stageKey];
-        const penalty = d.stagePenalties[stageKey] || 0;
-        
-        let effectiveTime = 0;
-        if (time > 0) {
-          effectiveTime = time + penalty;
-        } else if (time < 0) {
-          // DNF/DNS
-          const isOverall = settings.dnfCalculationMethod === 'overall';
-          const maxTime = isOverall 
-            ? (overallStats[stageKey]?.max || 0) 
-            : (classStats[cls]?.[stageKey]?.max || 0);
-          effectiveTime = maxTime + settings.dnfPenalty;
-          isDnfEntry[stageKey] = true;
-        }
-        
-        effectiveStageTimes[stageKey] = effectiveTime;
-        if (effectiveTime > 0) {
-          effectiveTotal += effectiveTime;
-        }
-      });
-
-      return {
-        ...d,
-        effectiveTotal,
-        effectiveStageTimes,
-        isDnfEntry
-      };
-    });
-  }, [drivers, classStats, overallStats, settings.dnfPenalty, settings.dnfCalculationMethod, stages]);
+  // Results calculation (class/overall stage stats, DNF substitution, effective totals) lives in lib/standings.ts.
+  const classStats = useMemo(() => computeClassStats(drivers, classes, stages), [drivers, classes]);
+  const overallStats = useMemo(() => computeOverallStats(drivers, stages), [drivers]);
+  const processedDrivers = useMemo(
+    () => computeProcessedDrivers(drivers, settings, classStats, overallStats, stages),
+    [drivers, classStats, overallStats, settings.dnfPenalty, settings.dnfCalculationMethod]
+  );
 
   const exportToCSV = () => {
     const headers = ['Pos', 'Car', 'Driver', 'Class', ...visibleStages.map(s => `SS${s}`), 'Total Time'];
@@ -206,8 +135,31 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
             >
               <List size={10} /> Leaderboard
             </button>
+            {viewMode === 'leaderboard' && (
+              <div className="flex items-center">
+                {(['class', 'overall'] as const).map(scope => (
+                  <button
+                    key={scope}
+                    onClick={() => setLeaderboardScope(scope)}
+                    className={`text-[8px] px-1.5 py-0.5 border ${leaderboardScope === scope ? 'bg-white text-black border-white' : 'text-(--text-secondary) border-(--line)'} uppercase font-bold transition-all`}
+                  >
+                    {scope === 'class' ? 'By Class' : 'Overall'}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+        {onOpenReport && (
+          <button
+            onClick={onOpenReport}
+            className="flex items-center gap-1.5 bg-(--accent) hover:bg-white text-black px-2 py-1 font-mono text-[8px] font-black uppercase transition-colors"
+          >
+            <FileText size={10} />
+            Report
+          </button>
+        )}
         <button 
           onClick={exportToCSV}
           className="flex items-center gap-1.5 bg-(--bg-darker) hover:bg-(--accent) text-white hover:text-black px-2 py-1 font-mono text-[8px] font-bold uppercase transition-colors border border-(--line)/40"
@@ -215,13 +167,14 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
           <Download size={10} />
           CSV
         </button>
+        </div>
       </div>
 
       <div className={`flex-1 overflow-auto custom-scrollbar ${viewMode === 'leaderboard' ? 'p-2 bg-(--bg-darker)' : ''}`}>
-        <div className={viewMode === 'leaderboard' ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 h-max' : ''}>
-          {classes.map(className => {
+        <div className={isOverall ? 'grid grid-cols-1 max-w-3xl mx-auto gap-2 h-max' : viewMode === 'leaderboard' ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 h-max' : ''}>
+          {(isOverall ? ['OVERALL'] : classes).map(className => {
             const classDrivers = processedDrivers
-              .filter(d => d.class.trim().toUpperCase() === className && (showHidden || !d.isHidden))
+              .filter(d => (isOverall || d.class.trim().toUpperCase() === className) && (showHidden || !d.isHidden))
               .sort((a, b) => a.effectiveTotal - b.effectiveTotal);
 
             if (classDrivers.length === 0) return null;
@@ -232,7 +185,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
               <div key={className} className={`mb-4 last:mb-0 ${viewMode === 'leaderboard' ? 'border border-(--line) bg-(--bg-panel) h-fit flex flex-col' : 'min-w-full w-max'}`}>
                 <div className={`sticky top-0 z-10 bg-(--bg-header) border-y border-(--line) px-4 py-1 flex items-center justify-between ${viewMode === 'leaderboard' ? 'border-t-0' : ''}`}>
                   <span className="sticky left-4 text-[9px] font-black text-(--accent) uppercase tracking-[0.2em] italic">
-                     {className} • CLASS GROUPING
+                     {isOverall ? 'OVERALL • ALL CLASSES' : `${className} • CLASS GROUPING`}
                   </span>
                 </div>
                 <table className="w-full text-left border-collapse font-mono text-[10px]">
@@ -309,6 +262,9 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                             </td>
                             <td className={`px-2 sm:px-3 py-0.5 min-w-0 ${pin ? 'sticky left-22 z-[1] bg-inherit w-28 min-w-28 max-w-28 border-r border-(--line)/30' : ''}`}>
                               <div className="font-black text-white uppercase text-[10px] leading-tight tabular-nums truncate max-w-[100px]" title={d.name}>{d.name}</div>
+                              {isOverall && (
+                                <div className="text-[8px] font-bold uppercase tracking-wider text-(--text-secondary) leading-tight">{d.class}</div>
+                              )}
                               {viewMode === 'leaderboard' && dnfDnsCount > 0 && (
                                 <div className="flex gap-0.5 mt-0.5">
                                   {Array.from({ length: dnfDnsCount }).map((_, i) => (
