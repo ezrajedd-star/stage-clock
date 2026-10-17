@@ -32,10 +32,14 @@ interface CarFacts {
 }
 
 const CLOCK = /(?<![\d:.])\+?(?:\d{1,2}:)?\d{1,2}:\d{2}\.\d{2}(?![\d])/g;
+const MIN_SEC = /(?<![\d:.])\+?(\d{1,2})\s?min\s?(\d{1,2}(?:\.\d{1,2})?)\s?(?:s|secs?|seconds?)\b/gi; // "1min 26.14sec"
 const SECONDS = /(?<![\d:.])\+?(\d{1,3}(?:\.\d{1,2})?)\s?(?:s|secs?|seconds?)\b/gi;
 const CAR = /#(\d{1,4})\b|\bcar\s+#?(\d{1,4})\b/gi;
 const ORDINAL = /\b(\d{1,2})(?:st|nd|rd|th)\b(?!\s+(?:stage|stages|ss|win|wins|time|times|consecutive|straight|career|round|event|rally|day|km|kilomet))/gi;
 const P_POS = /\bP(\d{1,2})\b/g;
+// Positions written as words, WRC style: "fourth overall", "second in class", "third place", "second-fastest".
+const WORD_NUMBERS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth', 'eighteenth', 'nineteenth', 'twentieth'];
+const WORD_POS = new RegExp(`\\b(${WORD_NUMBERS.join('|')})(?=[\\s-]+(?:place|overall|position|in (?:the )?(?:class|group|standings|order)|on the stage|fastest|quickest|best)\\b)`, 'gi');
 const PLACES = /\b(\d{1,2})\s+(?:places?|positions?|spots?)\b/gi;
 
 const toCs = (seconds: number) => Math.round(seconds * 100);
@@ -158,6 +162,14 @@ export function verifyDraft(draft: string, sheet: FactSheet): VerifyResult {
     const cs = toCs(parseClock(m[0].replace('+', '')));
     if (!facts.timesCs.has(cs)) add('time', s, e, `${m[0]} does not match any time or gap in the results.`);
   }
+  for (const m of draft.matchAll(MIN_SEC)) {
+    const s = m.index!, e = s + m[0].length;
+    if (masked.some(([a, b]) => s < b && e > a)) continue;
+    masked.push([s, e]);
+    checked++;
+    const cs = toCs(Number(m[1]) * 60 + Number(m[2]));
+    if (!facts.timesCs.has(cs)) add('time', s, e, `${m[0].trim()} does not match any time or gap in the results.`);
+  }
   for (const m of draft.matchAll(SECONDS)) {
     const s = m.index!, e = s + m[0].length;
     if (masked.some(([a, b]) => s < b && e > a)) continue;
@@ -188,6 +200,7 @@ export function verifyDraft(draft: string, sheet: FactSheet): VerifyResult {
   };
   for (const m of draft.matchAll(ORDINAL)) checkPosition(Number(m[1]), m.index!, m.index! + m[0].length);
   for (const m of draft.matchAll(P_POS)) checkPosition(Number(m[1]), m.index!, m.index! + m[0].length);
+  for (const m of draft.matchAll(WORD_POS)) checkPosition(WORD_NUMBERS.indexOf(m[1].toLowerCase()) + 1, m.index!, m.index! + m[0].length);
   for (const m of draft.matchAll(PLACES)) {
     checked++;
     const s = m.index!, e = s + m[0].length;

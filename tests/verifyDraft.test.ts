@@ -99,4 +99,21 @@ describe('verifyDraft', () => {
     expect(verifyDraft('Alpha (#2) won SS2.', sheet).issues.map(i => i.kind)).toEqual(['crew']);
     expect(verifyDraft('Bravo now leads, and Alpha drops to 3rd.', sheet).issues.map(i => i.kind)).toEqual(['position']);
   });
+
+  it('checks WRC-style gaps written in minutes and seconds', () => {
+    // Kim leads Group B on 04:21.00 (261s); Charlie's total gap to Bravo is +00:16.00.
+    expect(verifyDraft('Kim (#7) leads Group B on 4min 21.00sec.', sheet).ok).toBe(true);
+    expect(verifyDraft('Kim (#7) leads Group B on 4min 21.50sec.', sheet).issues.map(i => [i.kind, i.text])).toEqual([['time', '4min 21.50sec']]);
+    expect(verifyDraft('Bravo (#2) won by 5.00sec.', sheet).ok).toBe(true);
+  });
+
+  it('checks positions written as words', () => {
+    expect(verifyDraft('Alpha (#1) drops to second overall.', sheet).ok).toBe(true);
+    expect(verifyDraft('Alpha (#1) drops to fourth overall.', sheet).issues.map(i => [i.kind, i.text])).toEqual([['position', 'fourth']]);
+    expect(verifyDraft('Charlie (#3) was third-fastest.', sheet).ok).toBe(true);
+  });
+
+  it('does not read counts or stage numbers in words as positions', () => {
+    expect(verifyDraft('Bravo (#2) took his first stage win, the second stage of the day.', sheet).ok).toBe(true);
+  });
 });

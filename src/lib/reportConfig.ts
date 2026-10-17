@@ -22,19 +22,19 @@ export const REPORT_FORMATS = {
   summary: {
     label: 'Stage summary',
     instructions:
-      'Write a STAGE REPORT for the event website and Facebook, 150 to 230 words, plain text.\n' +
-      'Line 1: a headline in sentence case, at most 12 words, no colon, no emoji, naming who did what (like a newspaper headline, not a label).\n' +
-      'Then 2 or 3 short paragraphs: open with the top story from "headlines" and its key number; then what it means for the standings ' +
-      '(lead, gap, who is closing); finish with a one- or two-sentence round-up of the other class stage winners starting with "Elsewhere". ' +
-      'No emoji, no hashtags, no exclamation marks.\n' +
-      'Shape only (placeholders, never copy them): "<Name> (#<car>) won <stage> by <gap> from <Name> (#<car>) ... " then "That cuts <Name>\'s lead to <gap> ..." then "Elsewhere, <Name> (#<car>) took <class> ..."',
+      'Write a WRC.com-style STAGE REPORT for the event website and Facebook, 150 to 250 words, plain text.\n' +
+      'Line 1: the headline, WRC style: present tense, at most 14 words, built as "<Name> <strong verb> <what> as <second storyline>" ' +
+      '(the pattern of "X snatches the lead as Y keeps title hopes alive" or "X takes <gap> lead into <next stage>"). No colon, no emoji, no question.\n' +
+      'Then short paragraphs (one to three sentences each): the lead story with its key gap; the fight for the lead and the closest battle; ' +
+      '"Further back" / "Behind" for notable moves and any DNF or DNS; then one short paragraph per other class that has a story, starting "In <CLASS>, ...". ' +
+      'No emoji, no hashtags, no exclamation marks.',
   },
   social: {
     label: 'Social post',
     instructions:
-      'Write a SOCIAL POST for Facebook and Instagram, 40 to 90 words.\n' +
-      'Line 1: the headline result in one punchy sentence with its key time or gap (no generic opener such as "SS8 done!").\n' +
-      'Then 2 to 4 short lines, one fact per line, the most interesting first (a lead change, a close fight, a first win, the class winners in one line). ' +
+      'Write a SOCIAL POST in the voice of the WRC social channels, 40 to 90 words.\n' +
+      'Line 1: the result in a short, punchy line that leads with the name and the key gap (for example the shape "<Name> takes <stage> by <gap>"). No generic opener such as "SS8 done!".\n' +
+      'Then 2 to 4 short lines, one fact per line, the most interesting first (the lead and its gap, a close fight, a first stage win, other class winners in one line). ' +
       'At most 2 emoji in the whole post, only where they add something (🏁 ⏱️), never at the start of every line, never as labels. At most one exclamation mark.',
   },
 } as const;
