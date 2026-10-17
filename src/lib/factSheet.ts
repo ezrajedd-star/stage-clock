@@ -41,16 +41,24 @@ export interface StandingEntry {
 }
 
 export type Storyline =
-  | { type: 'stage_winner'; cars: string[]; crews: string[]; time: string; tied: boolean; marginToNext: string | null }
+  | { type: 'stage_winner'; cars: string[]; crews: string[]; time: string; tied: boolean; marginToNext: string | null; stageWinsThisEvent: number[] }
   | { type: 'first_stage_win'; car: string; crew: string }
   | { type: 'lead_change'; newLeader: { car: string; crew: string }; previousLeader: { car: string; crew: string }; gapToSecond: string | null }
-  | { type: 'lead_extended' | 'lead_reduced' | 'lead_unchanged'; leader: { car: string; crew: string }; previousGapToSecond: string; gapToSecond: string }
+  | { type: 'lead_extended' | 'lead_reduced' | 'lead_unchanged'; leader: { car: string; crew: string }; second: { car: string; crew: string }; previousGapToSecond: string; gapToSecond: string; change: string }
   | { type: 'leader_after_first_stage'; leader: { car: string; crew: string } }
   | { type: 'shared_lead'; cars: string[]; crews: string[] }
   | { type: 'closest_gap'; ahead: { car: string; crew: string; position: number }; behind: { car: string; crew: string; position: number }; gap: string }
   | { type: 'biggest_gain' | 'biggest_loss'; places: number; crews: { car: string; crew: string; from: number; to: number }[] }
   | { type: 'dnf' | 'dns'; car: string; crew: string; classifiedTime: string | null }
-  | { type: 'penalty'; car: string; crew: string; penaltySeconds: number };
+  | { type: 'penalty'; car: string; crew: string; penaltySeconds: number }
+  // Event-wide (across classes), computed in code so the writer never compares classes itself.
+  | { type: 'fastest_overall'; cars: string[]; crews: string[]; classes: string[]; time: string; tied: boolean; marginToNext: string | null }
+  | { type: 'closest_class_battle'; class: string; ahead: { car: string; crew: string; position: number }; behind: { car: string; crew: string; position: number }; gap: string };
+
+export interface Headline {
+  scope: string;     // class name, "OVERALL" or "EVENT"
+  story: Storyline;
+}
 
 export interface ScopeSheet {
   scope: 'class' | 'overall';
@@ -68,11 +76,20 @@ export interface FactSheet {
   dnfRule: string;
   classes: ScopeSheet[];
   overall: ScopeSheet;
+  eventStorylines: Storyline[];
+  headlines: Headline[];     // most newsworthy first, chosen by fixed rules
   disqualified: { car: string; crew: string; class: string }[];
   formatNotes: string;
 }
 
-const crewOf = (d: Driver) => d.name.trim();
+// Names entered all in lowercase are shown in title case ("ting tong" -> "Ting Tong");
+// short vowel-less words are initials ("vm" -> "VM"). Names with capitals are kept as entered.
+export function displayName(raw: string): string {
+  const name = raw.trim().replace(/\s+/g, ' ');
+  if (name !== name.toLowerCase()) return name;
+  return name.split(' ').map(w => (w.length <= 3 && !/[aeiouy]/.test(w) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1))).join(' ');
+}
+const crewOf = (d: Driver) => displayName(d.name);
 const hasResult = (d: Driver, stage: number) => d.stageTimes[String(stage)] !== undefined;
 
 // Same formatting as the board.
@@ -158,7 +175,7 @@ function storylinesFor(
   results: StageResultEntry[],
   standings: StandingEntry[],
   previousStandings: StandingEntry[] | null,
-  earlierWinners: Set<string>,
+  earlierWins: Map<string, number>,
 ): Storyline[] {
   const out: Storyline[] = [];
   const who = (e: { car: string; crew: string }) => ({ car: e.car, crew: e.crew });
@@ -174,10 +191,11 @@ function storylinesFor(
       time: winners[0].stageTime as string,
       tied: winners.length > 1,
       marginToNext: next ? next.gapToStageWinner : null,
+      stageWinsThisEvent: winners.map(w => (earlierWins.get(w.car + '|' + w.crew) ?? 0) + 1),
     });
     if (stage > 1) {
       for (const w of winners) {
-        if (!earlierWinners.has(w.car + '|' + w.crew)) out.push({ type: 'first_stage_win', ...who(w) });
+        if (!earlierWins.has(w.car + '|' + w.crew)) out.push({ type: 'first_stage_win', ...who(w) });
       }
     }
   }
@@ -201,7 +219,7 @@ function storylinesFor(
         const before = prevSecond.gapToLeader;
         const toCs = (g: string) => Math.round(parseClock(g.replace('+', '')) * 100);
         const type = toCs(now) > toCs(before) ? 'lead_extended' : toCs(now) < toCs(before) ? 'lead_reduced' : 'lead_unchanged';
-        out.push({ type, leader: who(leader), previousGapToSecond: before, gapToSecond: now });
+        out.push({ type, leader: who(leader), second: who(second), previousGapToSecond: before, gapToSecond: now, change: fmtGap(Math.abs(toCs(now) - toCs(before)) / 100) });
       }
     }
   }
@@ -268,7 +286,7 @@ function buildScope(
 
   let previousStandings: StandingEntry[] | null = null;
   let previousMap: Map<string, number> | null = null;
-  const earlierWinners = new Set<string>();
+  const earlierWins = new Map<string, number>();
   if (stage > 1) {
     const prevProcessed = computeResults(all, settings, stagesUpTo(stage - 1)).processed.filter(d => !d.isHidden && inScope(d));
     previousStandings = standingsFor(prevProcessed, stage - 1, null);
@@ -279,7 +297,7 @@ function buildScope(
     }
     for (let k = 1; k < stage; k++) {
       const earlier = computeResults(all, settings, stagesUpTo(k)).processed.filter(d => !d.isHidden && inScope(d));
-      stageResultsFor(earlier, k).filter(r => r.position === 1).forEach(r => earlierWinners.add(r.car + '|' + r.crew));
+      stageResultsFor(earlier, k).filter(r => r.position === 1).forEach(r => earlierWins.set(r.car + '|' + r.crew, (earlierWins.get(r.car + '|' + r.crew) ?? 0) + 1));
     }
   }
 
@@ -294,8 +312,62 @@ function buildScope(
     stageResults,
     standings,
     awaitingResult,
-    storylines: storylinesFor(stage, stageResults, standings, previousStandings, earlierWinners),
+    storylines: storylinesFor(stage, stageResults, standings, previousStandings, earlierWins),
   };
+}
+
+function buildEventStorylines(classes: ScopeSheet[], overall: ScopeSheet): Storyline[] {
+  const out: Storyline[] = [];
+  const winners = overall.stageResults.filter(r => r.position === 1);
+  if (winners.length) {
+    const next = overall.stageResults.find(r => r.position !== null && r.position > 1);
+    out.push({
+      type: 'fastest_overall',
+      cars: winners.map(w => w.car), crews: winners.map(w => w.crew), classes: winners.map(w => w.class),
+      time: winners[0].stageTime as string, tied: winners.length > 1, marginToNext: next ? next.gapToStageWinner : null,
+    });
+  }
+  // Closest fight between neighbours in any class's top 5 (ties between classes: first alphabetically).
+  let best: { cls: string; story: Extract<Storyline, { type: 'closest_gap' }> } | null = null;
+  for (const c of classes) {
+    const story = c.storylines.find((s): s is Extract<Storyline, { type: 'closest_gap' }> => s.type === 'closest_gap');
+    if (story && (!best || parseClock(story.gap.slice(1)) < parseClock(best.story.gap.slice(1)))) best = { cls: c.name, story };
+  }
+  if (best && classes.length > 1) {
+    out.push({ type: 'closest_class_battle', class: best.cls, ahead: best.story.ahead, behind: best.story.behind, gap: best.story.gap });
+  }
+  return out;
+}
+
+// Orders the stories a reporter would lead with. Fixed rules, no AI judgment.
+function rankHeadlines(classes: ScopeSheet[], overall: ScopeSheet, eventStorylines: Storyline[]): Headline[] {
+  const scored: { score: number; headline: Headline }[] = [];
+  const add = (scope: string, story: Storyline, score: number) => scored.push({ score, headline: { scope, story } });
+  const secs = (gap: string | null) => (gap ? parseClock(gap.replace('+', '')) : Infinity);
+
+  for (const story of overall.storylines) {
+    if (story.type === 'lead_change') add('OVERALL', story, 100);
+    if (story.type === 'shared_lead') add('OVERALL', story, 95);
+    if ((story.type === 'lead_extended' || story.type === 'lead_reduced') && secs(story.change) >= 1) add('OVERALL', story, 60);
+    if (story.type === 'biggest_gain' && story.places >= 2) add('OVERALL', story, 40);
+  }
+  for (const story of eventStorylines) {
+    if (story.type === 'fastest_overall') add('EVENT', story, story.tied || secs(story.marginToNext) < 1 ? 85 : 80);
+    if (story.type === 'closest_class_battle') add('EVENT', story, secs(story.gap) < 2 ? 70 : 50);
+  }
+  for (const c of classes) {
+    const prev = new Map(c.standings.map(s => [s.car, s.previousPosition]));
+    for (const story of c.storylines) {
+      if (story.type === 'lead_change') add(c.name, story, 90);
+      if (story.type === 'shared_lead') add(c.name, story, 88);
+      if (story.type === 'stage_winner') add(c.name, story, story.tied ? 78 : secs(story.marginToNext) < 1 ? 74 : 45);
+      if (story.type === 'first_stage_win') add(c.name, story, 72);
+      if ((story.type === 'dnf' || story.type === 'dns') && (prev.get(story.car) ?? 99) <= 3) add(c.name, story, 65);
+      if ((story.type === 'lead_extended' || story.type === 'lead_reduced') && secs(story.change) >= 5) add(c.name, story, 55);
+      if (story.type === 'biggest_gain' && story.places >= 2) add(c.name, story, 35);
+    }
+  }
+  return scored.sort((a, b) => b.score - a.score).slice(0, 8).map(s => s.headline);
 }
 
 export function buildFactSheet(drivers: Driver[], settings: Settings, stage: number, eventName?: string | null): FactSheet {
@@ -307,6 +379,7 @@ export function buildFactSheet(drivers: Driver[], settings: Settings, stage: num
     .filter(s => s.stageResults.length > 0 || s.awaitingResult.length > 0);
   const overall = buildScope('overall', 'OVERALL', drivers, settings, stage, () => true);
 
+  const eventStorylines = buildEventStorylines(classes, overall);
   const method = settings.dnfCalculationMethod === 'overall' ? 'slowest time on the stage overall' : 'slowest time on the stage in their class';
   return {
     event: { name: eventName?.trim() || null },
@@ -315,6 +388,8 @@ export function buildFactSheet(drivers: Driver[], settings: Settings, stage: num
     dnfRule: `Crews with a DNF or DNS on a stage stay classified: they are given the ${method} plus ${settings.dnfPenalty}s (the classifiedTime).`,
     classes,
     overall,
+    eventStorylines,
+    headlines: rankHeadlines(classes, overall, eventStorylines),
     disqualified: drivers.filter(d => d.isHidden).map(d => ({ car: d.carNumber, crew: crewOf(d), class: d.class })),
     formatNotes: 'Stage times are M:SS.ss as shown on the results board (leading "00:" dropped). Totals and gaps are MM:SS.ss (H:MM:SS.ss over an hour). Gaps start with "+". Positions are ranked within the class (classes) or across all classes (overall). Tied crews share a position.',
   };

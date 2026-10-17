@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Driver, Settings } from '../src/types';
-import { buildFactSheet, stageHasResults } from '../src/lib/factSheet';
+import { buildFactSheet, stageHasResults, displayName } from '../src/lib/factSheet';
 import { computeResults } from '../src/lib/standings';
 import { secondsToTime } from '../src/lib/rallyUtils';
 import drivers from './fixtures/drivers.firestore.json';
@@ -51,7 +51,7 @@ describe('fact sheet: normal stage', () => {
   });
 
   it('detects the stage winner and first stage win', () => {
-    expect(a.storylines).toContainEqual({ type: 'stage_winner', cars: ['2'], crews: ['BRAVO'], time: '01:45.00', tied: false, marginToNext: '+00:05.00' });
+    expect(a.storylines).toContainEqual({ type: 'stage_winner', cars: ['2'], crews: ['BRAVO'], time: '01:45.00', tied: false, marginToNext: '+00:05.00', stageWinsThisEvent: [1] });
     expect(a.storylines).toContainEqual({ type: 'first_stage_win', car: '2', crew: 'BRAVO' });
   });
 });
@@ -80,7 +80,7 @@ describe('fact sheet: lead change', () => {
 
   it('reports a leader extending the lead when there is no change', () => {
     const ext = cls(buildFactSheet([mk('1', 'ALPHA', 'A', [100, 100]), mk('2', 'BRAVO', 'A', [101, 103])], settings, 2), 'A');
-    expect(ext.storylines).toContainEqual({ type: 'lead_extended', leader: { car: '1', crew: 'ALPHA' }, previousGapToSecond: '+00:01.00', gapToSecond: '+00:04.00' });
+    expect(ext.storylines).toContainEqual({ type: 'lead_extended', leader: { car: '1', crew: 'ALPHA' }, second: { car: '2', crew: 'BRAVO' }, previousGapToSecond: '+00:01.00', gapToSecond: '+00:04.00', change: '+00:03.00' });
   });
 });
 
@@ -98,7 +98,7 @@ describe('fact sheet: ties', () => {
   });
 
   it('marks a shared stage win and a shared lead', () => {
-    expect(a.storylines).toContainEqual({ type: 'stage_winner', cars: ['4', '5'], crews: ['DELTA', 'ECHO'], time: '01:40.00', tied: true, marginToNext: '+00:01.50' });
+    expect(a.storylines).toContainEqual({ type: 'stage_winner', cars: ['4', '5'], crews: ['DELTA', 'ECHO'], time: '01:40.00', tied: true, marginToNext: '+00:01.50', stageWinsThisEvent: [1, 1] });
     expect(a.storylines).toContainEqual({ type: 'shared_lead', cars: ['4', '5'], crews: ['DELTA', 'ECHO'] });
   });
 
@@ -198,5 +198,53 @@ describe('fact sheet on real event data', () => {
     const kinds = new Set(sheet.classes.flatMap(c => c.storylines.map(s => s.type)));
     expect(kinds.has('stage_winner')).toBe(true);
     expect(kinds.has('closest_gap')).toBe(true);
+  });
+});
+
+describe('fact sheet: names', () => {
+  it('title-cases names entered in lowercase and keeps initials', () => {
+    expect(displayName('ting tong')).toBe('Ting Tong');
+    expect(displayName('vm locsin')).toBe('VM Locsin');
+    expect(displayName('pm')).toBe('PM');
+    expect(displayName('  win   win ')).toBe('Win Win');
+  });
+  it('keeps names that already have capitals as entered', () => {
+    expect(displayName('Mye malig')).toBe('Mye malig');
+    expect(displayName('KIM')).toBe('KIM');
+  });
+});
+
+describe('fact sheet: event-wide stories and headlines', () => {
+  const field = [
+    mk('1', 'alpha', 'A', [100, 110]),
+    mk('2', 'bravo', 'A', [101, 105]),
+    mk('3', 'charlie', 'A', [102, 120]),
+    mk('7', 'kim', 'B', [130, 131]),
+    mk('8', 'lee', 'B', [131, 130.5]),
+  ];
+  const sheet = buildFactSheet(field, settings, 2);
+
+  it('names the fastest crew across all classes', () => {
+    expect(sheet.eventStorylines).toContainEqual({ type: 'fastest_overall', cars: ['2'], crews: ['Bravo'], classes: ['A'], time: '01:45.00', tied: false, marginToNext: '+00:05.00' });
+  });
+
+  it('finds the closest class battle across classes in code', () => {
+    // Class A neighbours: 4.00s and 12.00s apart; class B: 0.50s apart.
+    expect(sheet.eventStorylines).toContainEqual({
+      type: 'closest_class_battle', class: 'B',
+      ahead: { car: '7', crew: 'Kim', position: 1 }, behind: { car: '8', crew: 'Lee', position: 2 }, gap: '+00:00.50',
+    });
+  });
+
+  it('counts stage wins this event', () => {
+    const a = cls(buildFactSheet([mk('1', 'alpha', 'A', [100, 100, 100]), mk('2', 'bravo', 'A', [101, 101, 101])], settings, 3), 'A');
+    expect(a.storylines.find(s => s.type === 'stage_winner')).toMatchObject({ cars: ['1'], stageWinsThisEvent: [3] });
+  });
+
+  it('ranks a lead change above a routine stage win', () => {
+    const types = sheet.headlines.map(h => `${h.scope}:${h.story.type}`);
+    expect(types[0]).toBe('OVERALL:lead_change');
+    expect(types.indexOf('A:lead_change')).toBeLessThan(types.indexOf('B:stage_winner') === -1 ? Infinity : types.indexOf('B:stage_winner'));
+    expect(sheet.headlines.length).toBeLessThanOrEqual(8);
   });
 });

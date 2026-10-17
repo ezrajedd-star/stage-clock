@@ -85,4 +85,35 @@ describe('verifyDraft', () => {
     const [issue] = verifyDraft(text, sheet).issues;
     expect(text.slice(issue.start, issue.end)).toBe('01:44.00');
   });
+
+  it('accepts natural journalist forms of the same numbers and names', () => {
+    const prose = 'Bravo (#2) won SS2 in 1:45.00, 5.00s clear of Alpha (#1), and now leads by 4.00 seconds. Alpha drops to 2nd. Kim (#7) leads Group B on 4:21.00.';
+    const r = verifyDraft(prose, sheet);
+    expect(r.issues).toEqual([]);
+    expect(r.checked).toBeGreaterThan(8);
+  });
+
+  it('still catches errors written in natural forms', () => {
+    expect(verifyDraft('Bravo (#2) won SS2 in 1:44.00.', sheet).issues.map(i => i.kind)).toEqual(['time']);
+    expect(verifyDraft('Bravo (#2) leads by 4.10s.', sheet).issues.map(i => i.kind)).toEqual(['time']);
+    expect(verifyDraft('Alpha (#2) won SS2.', sheet).issues.map(i => i.kind)).toEqual(['crew']);
+    expect(verifyDraft('Bravo now leads, and Alpha drops to 3rd.', sheet).issues.map(i => i.kind)).toEqual(['position']);
+  });
+
+  it('checks WRC-style gaps written in minutes and seconds', () => {
+    // Kim leads Group B on 04:21.00 (261s); Charlie's total gap to Bravo is +00:16.00.
+    expect(verifyDraft('Kim (#7) leads Group B on 4min 21.00sec.', sheet).ok).toBe(true);
+    expect(verifyDraft('Kim (#7) leads Group B on 4min 21.50sec.', sheet).issues.map(i => [i.kind, i.text])).toEqual([['time', '4min 21.50sec']]);
+    expect(verifyDraft('Bravo (#2) won by 5.00sec.', sheet).ok).toBe(true);
+  });
+
+  it('checks positions written as words', () => {
+    expect(verifyDraft('Alpha (#1) drops to second overall.', sheet).ok).toBe(true);
+    expect(verifyDraft('Alpha (#1) drops to fourth overall.', sheet).issues.map(i => [i.kind, i.text])).toEqual([['position', 'fourth']]);
+    expect(verifyDraft('Charlie (#3) was third-fastest.', sheet).ok).toBe(true);
+  });
+
+  it('does not read counts or stage numbers in words as positions', () => {
+    expect(verifyDraft('Bravo (#2) took his first stage win, the second stage of the day.', sheet).ok).toBe(true);
+  });
 });

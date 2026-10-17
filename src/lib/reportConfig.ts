@@ -22,15 +22,20 @@ export const REPORT_FORMATS = {
   summary: {
     label: 'Stage summary',
     instructions:
-      'Write a STAGE SUMMARY: 120 to 220 words in 2 to 4 short paragraphs of plain text. ' +
-      'Cover the stage winner in each class, any lead change (or the leader extending or losing ground), and the closest battle. ' +
-      'You may mention the fastest time overall if the overall section supports it. No emoji, no hashtags, no headings.',
+      'Write a WRC.com-style STAGE REPORT for the event website and Facebook, 150 to 250 words, plain text.\n' +
+      'Line 1: the headline, WRC style: present tense, at most 14 words, built as "<Name> <strong verb> <what> as <second storyline>" ' +
+      '(the pattern of "X snatches the lead as Y keeps title hopes alive" or "X takes <gap> lead into <next stage>"). No colon, no emoji, no question.\n' +
+      'Then short paragraphs (one to three sentences each): the lead story with its key gap; the fight for the lead and the closest battle; ' +
+      '"Further back" / "Behind" for notable moves and any DNF or DNS; then one short paragraph per other class that has a story, starting "In <CLASS>, ...". ' +
+      'No emoji, no hashtags, no exclamation marks.',
   },
   social: {
     label: 'Social post',
     instructions:
-      'Write a SOCIAL POST for Facebook and Instagram: punchy, 50 to 120 words, short lines. ' +
-      'Lead with the headline result, then one or two more highlights. A few emoji are fine.',
+      'Write a SOCIAL POST in the voice of the WRC social channels, 40 to 90 words.\n' +
+      'Line 1: the result in a short, punchy line that leads with the name and the key gap (for example the shape "<Name> takes <stage> by <gap>"). No generic opener such as "SS8 done!".\n' +
+      'Then 2 to 4 short lines, one fact per line, the most interesting first (the lead and its gap, a close fight, a first stage win, other class winners in one line). ' +
+      'At most 2 emoji in the whole post, only where they add something (🏁 ⏱️), never at the start of every line, never as labels. At most one exclamation mark.',
   },
 } as const;
 
