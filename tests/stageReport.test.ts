@@ -52,8 +52,11 @@ describe('POST /api/stage-report', () => {
     const params = (d.createMessage as ReturnType<typeof vi.fn>).mock.calls[0][1];
     expect(params.model).toBe(REPORT_MODEL);
     expect(params.fallbacks).toBe('default');
-    expect(params.system).toContain('Copy every time, gap and penalty exactly');
-    expect(params.system).toContain('Never mock');
+    expect(params.system).toContain('Copy every time, gap and penalty digit for digit');
+    expect(params.system).toContain('Never compare classes yourself');
+    expect(params.system).toContain('Never mock or belittle');
+    expect(params.system).toContain('thrilling, electrifying');
+    expect(params.output_config).toEqual({ effort: 'high' });
     const user = params.messages[0].content as string;
     expect(user).toContain('SOCIAL POST');
     expect(user).toContain('"label":"SS2"');

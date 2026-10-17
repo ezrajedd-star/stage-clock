@@ -22,15 +22,20 @@ export const REPORT_FORMATS = {
   summary: {
     label: 'Stage summary',
     instructions:
-      'Write a STAGE SUMMARY: 120 to 220 words in 2 to 4 short paragraphs of plain text. ' +
-      'Cover the stage winner in each class, any lead change (or the leader extending or losing ground), and the closest battle. ' +
-      'You may mention the fastest time overall if the overall section supports it. No emoji, no hashtags, no headings.',
+      'Write a STAGE REPORT for the event website and Facebook, 150 to 230 words, plain text.\n' +
+      'Line 1: a headline in sentence case, at most 12 words, no colon, no emoji, naming who did what (like a newspaper headline, not a label).\n' +
+      'Then 2 or 3 short paragraphs: open with the top story from "headlines" and its key number; then what it means for the standings ' +
+      '(lead, gap, who is closing); finish with a one- or two-sentence round-up of the other class stage winners starting with "Elsewhere". ' +
+      'No emoji, no hashtags, no exclamation marks.\n' +
+      'Shape only (placeholders, never copy them): "<Name> (#<car>) won <stage> by <gap> from <Name> (#<car>) ... " then "That cuts <Name>\'s lead to <gap> ..." then "Elsewhere, <Name> (#<car>) took <class> ..."',
   },
   social: {
     label: 'Social post',
     instructions:
-      'Write a SOCIAL POST for Facebook and Instagram: punchy, 50 to 120 words, short lines. ' +
-      'Lead with the headline result, then one or two more highlights. A few emoji are fine.',
+      'Write a SOCIAL POST for Facebook and Instagram, 40 to 90 words.\n' +
+      'Line 1: the headline result in one punchy sentence with its key time or gap (no generic opener such as "SS8 done!").\n' +
+      'Then 2 to 4 short lines, one fact per line, the most interesting first (a lead change, a close fight, a first win, the class winners in one line). ' +
+      'At most 2 emoji in the whole post, only where they add something (🏁 ⏱️), never at the start of every line, never as labels. At most one exclamation mark.',
   },
 } as const;
 

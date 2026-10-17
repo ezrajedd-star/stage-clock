@@ -122,7 +122,7 @@ async function callClaude(deps: Deps, apiKey: string, messages: Anthropic.Beta.B
     const message = await deps.createMessage(apiKey, {
       model: REPORT_MODEL,
       max_tokens: 4000,
-      output_config: { effort: 'medium' },
+      output_config: { effort: 'high' }, // writing quality matters more than the extra cent
       system: SYSTEM_PROMPT,
       messages,
       ...fallback,
