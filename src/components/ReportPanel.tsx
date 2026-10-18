@@ -10,8 +10,8 @@ import type { Driver, Settings } from '../types';
 import { buildFactSheet } from '../lib/factSheet';
 import { verifyDraft } from '../lib/verifyDraft';
 import {
-  REPORT_FORMATS, REPORT_ERRORS, MAX_NOTES_LENGTH, MAX_EVENT_NAME_LENGTH,
-  type ReportFormat, type ReportResponse, type ReportIssue,
+  REPORT_FORMATS, REPORT_WRITERS, REPORT_ERRORS, MAX_NOTES_LENGTH, MAX_EVENT_NAME_LENGTH,
+  type ReportFormat, type ReportResponse, type ReportIssue, type ReportWriter,
 } from '../lib/reportConfig';
 
 interface ReportPanelProps {
@@ -48,6 +48,19 @@ export default function ReportPanel({ drivers, settings, getIdToken, onSaveEvent
   const [stage, setStage] = useState<number>(stagesWithResults[stagesWithResults.length - 1] ?? 1);
   const [eventName, setEventName] = useState(settings.eventName ?? '');
   const [format, setFormat] = useState<ReportFormat>('summary');
+  // Remember the operator's writer choice on this device.
+  const [writer, setWriterState] = useState<ReportWriter>(() => {
+    try {
+      const saved = localStorage.getItem('stageclock.reportWriter');
+      return saved && Object.hasOwn(REPORT_WRITERS, saved) ? (saved as ReportWriter) : 'standard';
+    } catch {
+      return 'standard';
+    }
+  });
+  const setWriter = (w: ReportWriter) => {
+    setWriterState(w);
+    try { localStorage.setItem('stageclock.reportWriter', w); } catch { /* storage unavailable */ }
+  };
   const [hashtags, setHashtags] = useState(true);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
@@ -77,7 +90,7 @@ export default function ReportPanel({ drivers, settings, getIdToken, onSaveEvent
       const res = await fetch('/api/stage-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ stage, format, notes, eventName: eventName.trim(), hashtags }),
+        body: JSON.stringify({ stage, format, notes, eventName: eventName.trim(), hashtags, writer }),
       });
       const body = await res.json().catch(() => null);
       if (!res.ok || !body) {
@@ -172,6 +185,22 @@ export default function ReportPanel({ drivers, settings, getIdToken, onSaveEvent
               </div>
 
               <div className="space-y-1">
+                <label className={label}>Writer</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {(Object.keys(REPORT_WRITERS) as ReportWriter[]).map(w => (
+                    <button
+                      key={w}
+                      onClick={() => setWriter(w)}
+                      className={`text-[10px] px-3 py-1.5 border uppercase font-bold transition-all ${writer === w ? 'bg-white text-black border-white' : 'text-(--text-secondary) border-(--line) hover:text-white'}`}
+                    >
+                      {REPORT_WRITERS[w].label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[9px] text-(--text-subtle) font-bold uppercase leading-snug">{REPORT_WRITERS[writer].description}</p>
+              </div>
+
+              <div className="space-y-1">
                 <label className={label}>Notes (optional)</label>
                 <textarea
                   value={notes}
@@ -189,7 +218,7 @@ export default function ReportPanel({ drivers, settings, getIdToken, onSaveEvent
                 className="w-full h-10 bg-(--accent) hover:bg-white text-black font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all disabled:opacity-50 text-[10px]"
               >
                 {loading ? <Activity size={14} className="animate-spin" /> : result ? <RefreshCw size={14} /> : <FileText size={14} />}
-                {loading ? 'Writing & checking numbers…' : result ? 'Regenerate' : 'Generate report'}
+                {loading ? (writer === 'premium' ? 'Premium writer at work… up to a minute' : 'Writing & checking numbers…') : result ? 'Regenerate' : 'Generate report'}
               </button>
 
               {error && (

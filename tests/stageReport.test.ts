@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import Anthropic from '@anthropic-ai/sdk';
 import type { Driver, Settings } from '../src/types';
 import { handleStageReport, type Deps } from '../src/server/stageReport';
-import { REPORT_MODEL, FIREBASE_PROJECT_ID, FIRESTORE_DATABASE_ID, FIREBASE_WEB_API_KEY } from '../src/lib/reportConfig';
+import { REPORT_MODEL, REPORT_WRITERS, FIREBASE_PROJECT_ID, FIRESTORE_DATABASE_ID, FIREBASE_WEB_API_KEY } from '../src/lib/reportConfig';
 import firebaseConfig from '../firebase-applet-config.json';
 
 const settings: Settings = { dnfPenalty: 60, dnfCalculationMethod: 'class', eventName: 'Test Rally' };
@@ -56,12 +56,28 @@ describe('POST /api/stage-report', () => {
     expect(params.system).toContain('Never compare classes yourself');
     expect(params.system).toContain('Never mock or belittle');
     expect(params.system).toContain('thrilling, electrifying');
+    expect(params.system).toContain('Opinions about people in the notes');
+    expect(params.system).toContain("Don't read out a results table");
     expect(params.output_config).toEqual({ effort: 'high' });
     const user = params.messages[0].content as string;
     expect(user).toContain('SOCIAL POST');
     expect(user).toContain('"label":"SS2"');
     expect(user).toContain('"name":"Test Rally"');
     expect(user).toContain('rain from SS2');
+  });
+
+  it('uses the standard writer by default and the premium writer when chosen', async () => {
+    const d = deps();
+    const std = await (await handleStageReport(post({ stage: 2, format: 'summary' }), d)).json();
+    const prem = await (await handleStageReport(post({ stage: 2, format: 'social', writer: 'premium' }), d)).json();
+    const calls = (d.createMessage as ReturnType<typeof vi.fn>).mock.calls;
+    expect(calls[0][1]).toMatchObject({ model: REPORT_WRITERS.standard.model, output_config: { effort: 'high' }, max_tokens: 16000 });
+    expect(calls[1][1]).toMatchObject({ model: 'claude-opus-5-5', output_config: { effort: 'high' }, max_tokens: 16000, fallbacks: 'default' });
+    expect([std.writer, prem.writer]).toEqual(['standard', 'premium']);
+  });
+
+  it('rejects an unknown writer', async () => {
+    expect((await handleStageReport(post({ stage: 2, format: 'summary', writer: 'gpt' }), deps())).status).toBe(400);
   });
 
   it('regenerates once with the mismatches when the check fails', async () => {
