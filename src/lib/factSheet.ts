@@ -280,7 +280,7 @@ function buildScope(
   inScope: (d: Driver) => boolean,
 ): ScopeSheet {
   const stagesUpTo = (n: number) => Array.from({ length: n }, (_, i) => i + 1);
-  // Stats use every entry (incl. DSQ), exactly like the board; rankings exclude DSQ.
+  // Same calculation as the board (DSQ rows don't count towards DNF times); rankings exclude DSQ.
   const current = computeResults(all, settings, stagesUpTo(stage)).processed.filter(d => !d.isHidden && inScope(d));
   const stageResults = stageResultsFor(current, stage);
 

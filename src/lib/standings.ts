@@ -5,7 +5,7 @@
 
 import type { Driver, Settings } from '../types';
 
-// The results calculation used by the results board. Moved here unchanged from
+// The results calculation used by the results board. Moved here from
 // ResultsDisplay.tsx so the board and the Stage Report Writer share one source
 // of truth. `stages` limits which stages count (e.g. [1, 2, 3] for standings
 // after SS3); the board passes all 12.
@@ -26,7 +26,11 @@ export function getClasses(drivers: Driver[]): string[] {
   return Array.from(new Set(drivers.map(classKey))).sort();
 }
 
-// Per class, per stage: fastest and slowest time including penalty (valid times only).
+// Only official entries count towards the fastest/slowest times (and so the DNF/DNS
+// substitute time): disqualified (hidden) rows are left out.
+const isOfficial = (d: Driver) => !d.isHidden;
+
+// Per class, per stage: fastest and slowest time including penalty (valid times, official entries only).
 export function computeClassStats(drivers: Driver[], classes: string[], stages: number[]) {
   const stats: Record<string, StageStats> = {};
 
@@ -35,7 +39,7 @@ export function computeClassStats(drivers: Driver[], classes: string[], stages: 
     stages.forEach(s => {
       const stageKey = s.toString();
       const times = drivers
-        .filter(d => d.class.trim().toUpperCase() === cls && d.stageTimes[stageKey] > 0)
+        .filter(d => isOfficial(d) && d.class.trim().toUpperCase() === cls && d.stageTimes[stageKey] > 0)
         .map(d => d.stageTimes[stageKey] + (d.stagePenalties[stageKey] || 0));
 
       if (times.length > 0) {
@@ -50,13 +54,13 @@ export function computeClassStats(drivers: Driver[], classes: string[], stages: 
   return stats;
 }
 
-// Per stage across all classes: fastest and slowest time including penalty.
+// Per stage across all classes: fastest and slowest time including penalty (official entries only).
 export function computeOverallStats(drivers: Driver[], stages: number[]) {
   const stats: StageStats = {};
   stages.forEach(s => {
     const stageKey = s.toString();
     const times = drivers
-      .filter(d => d.stageTimes[stageKey] > 0)
+      .filter(d => isOfficial(d) && d.stageTimes[stageKey] > 0)
       .map(d => d.stageTimes[stageKey] + (d.stagePenalties[stageKey] || 0));
 
     if (times.length > 0) {
