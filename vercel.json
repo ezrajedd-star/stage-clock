@@ -1,5 +1,5 @@
 {
   "functions": {
-    "api/stage-report.ts": { "maxDuration": 60 }
+    "api/stage-report.ts": { "maxDuration": 300 }
   }
 }

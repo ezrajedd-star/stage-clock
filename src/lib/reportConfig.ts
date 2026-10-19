@@ -5,8 +5,27 @@
 
 // Shared by the browser (report panel) and the server (api/stage-report).
 
-// Claude model for the Stage Report Writer. Swap for e.g. 'claude-haiku-5-5' to lower cost.
-export const REPORT_MODEL = 'claude-sonnet-5-5';
+// Writers the operator can choose in the report panel. Each is a Claude model plus an effort level
+// (how hard the model thinks before writing). Swap models here, e.g. 'claude-haiku-5-5' to lower cost.
+export const REPORT_WRITERS = {
+  standard: {
+    label: 'Standard',
+    model: 'claude-sonnet-5-5',
+    effort: 'high',
+    description: 'Fast (10–30s) · about US$0.03–0.05 per report',
+  },
+  premium: {
+    label: 'Premium',
+    model: 'claude-opus-5-5',
+    effort: 'high',
+    description: 'Best writing · slower (up to about a minute) · about US$0.08–0.20 per report',
+  },
+} as const;
+
+export type ReportWriter = keyof typeof REPORT_WRITERS;
+
+// Default writer.
+export const REPORT_MODEL = REPORT_WRITERS.standard.model;
 
 // Must match the admin email in firestore.rules.
 export const ADMIN_EMAIL = 'ezrajedd@gmail.com';
@@ -74,6 +93,7 @@ export interface ReportIssue {
 
 export interface ReportResponse {
   draft: string;
+  writer: ReportWriter;      // which writer produced it
   verified: boolean;         // every checked number matched the fact sheet
   checked: number;           // how many numbers / pairings were checked
   issues: ReportIssue[];     // non-empty only when verified is false

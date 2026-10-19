@@ -16,8 +16,8 @@ import { SYSTEM_PROMPT, buildUserMessage, buildCorrectionMessage } from '../lib/
 import { decodeDriver, decodeSettings, type RestDocument } from '../lib/firestoreRest.js';
 import {
   ADMIN_EMAIL, FIREBASE_PROJECT_ID, FIRESTORE_DATABASE_ID, FIREBASE_WEB_API_KEY,
-  REPORT_MODEL, REPORT_FORMATS, REPORT_ERRORS, MAX_NOTES_LENGTH, MAX_EVENT_NAME_LENGTH,
-  type ReportErrorCode, type ReportFormat, type ReportResponse,
+  REPORT_WRITERS, REPORT_FORMATS, REPORT_ERRORS, MAX_NOTES_LENGTH, MAX_EVENT_NAME_LENGTH,
+  type ReportErrorCode, type ReportFormat, type ReportResponse, type ReportWriter,
 } from '../lib/reportConfig.js';
 
 const FIRESTORE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/${FIRESTORE_DATABASE_ID}/documents`;
@@ -73,7 +73,8 @@ export const defaultDeps: Deps = {
   },
 
   createMessage: (apiKey, params) =>
-    new Anthropic({ apiKey, maxRetries: 2, timeout: 50_000 }).beta.messages.create(params),
+    // One automatic retry on network errors / overload; the premium writer can take a while to think.
+    new Anthropic({ apiKey, maxRetries: 1, timeout: 120_000 }).beta.messages.create(params),
 };
 
 class ReportError extends Error {
@@ -94,6 +95,7 @@ interface ParsedRequest {
   notes: string;
   eventName: string | null;
   hashtags: boolean;
+  writer: ReportWriter;
 }
 
 function parseBody(body: unknown): ParsedRequest | null {
@@ -106,23 +108,27 @@ function parseBody(body: unknown): ParsedRequest | null {
   if (notes.length > MAX_NOTES_LENGTH) return null;
   const eventName = typeof b.eventName === 'string' ? b.eventName.trim() : '';
   if (eventName.length > MAX_EVENT_NAME_LENGTH) return null;
-  return { stage, format: b.format as ReportFormat, notes, eventName: eventName || null, hashtags: b.hashtags !== false };
+  const writer = b.writer === undefined ? 'standard' : b.writer;
+  if (typeof writer !== 'string' || !Object.hasOwn(REPORT_WRITERS, writer)) return null;
+  return { stage, format: b.format as ReportFormat, notes, eventName: eventName || null, hashtags: b.hashtags !== false, writer: writer as ReportWriter };
 }
 
 const draftText = (message: Anthropic.Beta.BetaMessage) =>
   message.content.filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text').map(b => b.text).join('').trim();
 
-async function callClaude(deps: Deps, apiKey: string, messages: Anthropic.Beta.BetaMessageParam[]) {
+async function callClaude(deps: Deps, apiKey: string, writer: ReportWriter, messages: Anthropic.Beta.BetaMessageParam[]) {
+  const { model, effort } = REPORT_WRITERS[writer];
   // Server-side refusal fallback: if a safety classifier declines, another model
   // retries inside the same call. Not available for Haiku models.
-  const fallback = REPORT_MODEL.startsWith('claude-haiku')
+  const fallback = model.startsWith('claude-haiku')
     ? {}
     : { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const };
   try {
     const message = await deps.createMessage(apiKey, {
-      model: REPORT_MODEL,
-      max_tokens: 4000,
-      output_config: { effort: 'high' }, // writing quality matters more than the extra cent
+      model,
+      // Thinking counts toward max_tokens (the report itself is ~300-500 tokens).
+      max_tokens: 16000,
+      output_config: { effort },
       system: SYSTEM_PROMPT,
       messages,
       ...fallback,
@@ -175,19 +181,20 @@ export async function handleStageReport(request: Request, deps: Deps = defaultDe
     const messages: Anthropic.Beta.BetaMessageParam[] = [
       { role: 'user', content: buildUserMessage(sheet, { format: parsed.format, notes: parsed.notes, hashtags: parsed.hashtags }) },
     ];
-    let { message, text } = await callClaude(deps, apiKey, messages);
+    let { message, text } = await callClaude(deps, apiKey, parsed.writer, messages);
     let check = verifyDraft(text, sheet);
     let attempts = 1;
     if (!check.ok) {
       messages.push({ role: 'assistant', content: message.content as Anthropic.Beta.BetaContentBlockParam[] });
       messages.push({ role: 'user', content: buildCorrectionMessage(check.issues as DraftIssue[]) });
-      ({ message, text } = await callClaude(deps, apiKey, messages));
+      ({ message, text } = await callClaude(deps, apiKey, parsed.writer, messages));
       check = verifyDraft(text, sheet);
       attempts = 2;
     }
 
     const body: ReportResponse = {
       draft: text,
+      writer: parsed.writer,
       verified: check.ok,
       checked: check.checked,
       issues: check.issues,
