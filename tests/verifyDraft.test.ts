@@ -117,3 +117,22 @@ describe('verifyDraft', () => {
     expect(verifyDraft('Bravo (#2) took his first stage win, the second stage of the day.', sheet).ok).toBe(true);
   });
 });
+
+describe('verifyDraft with car models', () => {
+  const withCars = buildFactSheet([
+    { ...mk('1', 'ALPHA', 'A', [100, 110]), carModel: 'Turbo 4EFTE Corolla' },
+    { ...mk('2', 'BRAVO', 'A', [101, 105]), carModel: 'H6 GC8 WRX STI' },
+  ], settings, 2);
+
+  it('does not read numbers inside a car model as times, positions or car numbers', () => {
+    const r = verifyDraft('Bravo (#2) won SS2 in his H6 GC8 WRX STI; Alpha (#1) and the Turbo 4EFTE Corolla dropped to second overall.', withCars);
+    expect(r.issues).toEqual([]);
+  });
+
+  it('still reports issues at the right place in the original text', () => {
+    const text = 'Bravo (#2) in the H6 GC8 WRX STI won in 1:44.00.';
+    const [issue] = verifyDraft(text, withCars).issues;
+    expect(issue.text).toBe('1:44.00');
+    expect(text.slice(issue.start, issue.end)).toBe('1:44.00');
+  });
+});

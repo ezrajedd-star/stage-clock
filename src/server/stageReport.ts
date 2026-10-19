@@ -11,13 +11,14 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import type { Driver, Settings } from '../types';
 import { buildFactSheet, stageHasResults } from '../lib/factSheet.js';
+import { buildRallySheet } from '../lib/rallySheet.js';
 import { verifyDraft, type DraftIssue } from '../lib/verifyDraft.js';
 import { SYSTEM_PROMPT, buildUserMessage, buildCorrectionMessage } from '../lib/reportPrompt.js';
 import { decodeDriver, decodeSettings, type RestDocument } from '../lib/firestoreRest.js';
 import {
   ADMIN_EMAIL, FIREBASE_PROJECT_ID, FIRESTORE_DATABASE_ID, FIREBASE_WEB_API_KEY,
-  REPORT_WRITERS, REPORT_FORMATS, REPORT_ERRORS, MAX_NOTES_LENGTH, MAX_EVENT_NAME_LENGTH,
-  type ReportErrorCode, type ReportFormat, type ReportResponse, type ReportWriter,
+  REPORT_WRITERS, REPORT_FORMATS, REPORT_SCOPES, REPORT_ERRORS, MAX_NOTES_LENGTH, MAX_EVENT_NAME_LENGTH,
+  type ReportErrorCode, type ReportFormat, type ReportResponse, type ReportWriter, type ReportScope,
 } from '../lib/reportConfig.js';
 
 const FIRESTORE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/${FIRESTORE_DATABASE_ID}/documents`;
@@ -96,6 +97,7 @@ interface ParsedRequest {
   eventName: string | null;
   hashtags: boolean;
   writer: ReportWriter;
+  scope: ReportScope;
 }
 
 function parseBody(body: unknown): ParsedRequest | null {
@@ -103,14 +105,19 @@ function parseBody(body: unknown): ParsedRequest | null {
   const b = body as Record<string, unknown>;
   const stage = Number(b.stage);
   if (!Number.isInteger(stage) || stage < 1 || stage > 12) return null;
-  if (typeof b.format !== 'string' || !(b.format in REPORT_FORMATS)) return null;
+  if (typeof b.format !== 'string' || !Object.hasOwn(REPORT_FORMATS, b.format)) return null;
   const notes = typeof b.notes === 'string' ? b.notes : '';
   if (notes.length > MAX_NOTES_LENGTH) return null;
   const eventName = typeof b.eventName === 'string' ? b.eventName.trim() : '';
   if (eventName.length > MAX_EVENT_NAME_LENGTH) return null;
   const writer = b.writer === undefined ? 'standard' : b.writer;
   if (typeof writer !== 'string' || !Object.hasOwn(REPORT_WRITERS, writer)) return null;
-  return { stage, format: b.format as ReportFormat, notes, eventName: eventName || null, hashtags: b.hashtags !== false, writer: writer as ReportWriter };
+  const scope = b.scope === undefined ? 'stage' : b.scope;
+  if (typeof scope !== 'string' || !Object.hasOwn(REPORT_SCOPES, scope)) return null;
+  return {
+    stage, format: b.format as ReportFormat, notes, eventName: eventName || null, hashtags: b.hashtags !== false,
+    writer: writer as ReportWriter, scope: scope as ReportScope,
+  };
 }
 
 const draftText = (message: Anthropic.Beta.BetaMessage) =>
@@ -126,7 +133,7 @@ async function callClaude(deps: Deps, apiKey: string, writer: ReportWriter, mess
   try {
     const message = await deps.createMessage(apiKey, {
       model,
-      // Thinking counts toward max_tokens (the report itself is ~300-500 tokens).
+      // Thinking counts toward max_tokens (the report itself is ~300-800 tokens).
       max_tokens: 16000,
       output_config: { effort },
       system: SYSTEM_PROMPT,
@@ -175,7 +182,11 @@ export async function handleStageReport(request: Request, deps: Deps = defaultDe
       return fail('DATA_UNAVAILABLE', 502);
     }
     if (!stageHasResults(data.drivers, parsed.stage)) return fail('NO_RESULTS', 422);
-    const sheet = buildFactSheet(data.drivers, data.settings, parsed.stage, parsed.eventName ?? data.settings.eventName);
+    const eventName = parsed.eventName ?? data.settings.eventName;
+    // One stage, or the whole rally from SS1 up to the chosen stage.
+    const sheet = parsed.scope === 'rally'
+      ? buildRallySheet(data.drivers, data.settings, parsed.stage, eventName)
+      : buildFactSheet(data.drivers, data.settings, parsed.stage, eventName);
 
     // 5. Write, check every number, regenerate once with the mismatches if needed.
     const messages: Anthropic.Beta.BetaMessageParam[] = [
@@ -195,12 +206,13 @@ export async function handleStageReport(request: Request, deps: Deps = defaultDe
     const body: ReportResponse = {
       draft: text,
       writer: parsed.writer,
+      scope: parsed.scope,
       verified: check.ok,
       checked: check.checked,
       issues: check.issues,
       attempts,
       provisional: sheet.provisional,
-      stageLabel: sheet.stage.label,
+      stageLabel: sheet.kind === 'rally' ? sheet.covers.label : sheet.stage.label,
       model: message.model,
     };
     return json(200, body);
