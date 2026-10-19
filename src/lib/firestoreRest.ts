@@ -48,6 +48,7 @@ export function decodeDriver(doc: RestDocument): Driver {
     id,
     name: String(data.name ?? ''),
     carNumber: String(data.carNumber ?? ''),
+    ...(typeof data.carModel === 'string' && data.carModel.trim() ? { carModel: data.carModel.trim() } : {}),
     class: String(data.class ?? ''),
     stageTimes: (data.stageTimes as Record<string, number>) ?? {},
     stagePenalties: (data.stagePenalties as Record<string, number>) ?? {},

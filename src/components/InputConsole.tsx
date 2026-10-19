@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { Send, UserPlus, Hash, Layers, PlayCircle, ShieldAlert } from 'lucide-react';
+import { Send, UserPlus, Hash, Layers, PlayCircle, ShieldAlert, Car, Save } from 'lucide-react';
 import { Driver, Settings } from '../types';
 
 interface InputConsoleProps {
@@ -12,20 +12,23 @@ interface InputConsoleProps {
     driverName: string;
     carNumber: string;
     carClass: string;
+    carModel: string;
     ssNum: string;
     recordedTime: string;
     penaltySec: number;
   }) => void;
+  onUpdateCarModel: (driverId: string, carModel: string) => void;
   isLoading: boolean;
   drivers: Driver[];
   settings: Settings;
   onUpdateSettings: (s: Partial<Settings>) => void;
 }
 
-export default function InputConsole({ onUpdate, isLoading, drivers, settings, onUpdateSettings }: InputConsoleProps) {
+export default function InputConsole({ onUpdate, onUpdateCarModel, isLoading, drivers, settings, onUpdateSettings }: InputConsoleProps) {
   const [driverName, setDriverName] = useState("");
   const [carNumber, setCarNumber] = useState("");
   const [carClass, setCarClass] = useState("");
+  const [carModel, setCarModel] = useState("");
   const [ssNum, setSsNum] = useState("1");
   const [recordedTime, setRecordedTime] = useState("");
   const [penaltySec, setPenaltySec] = useState(0);
@@ -52,8 +55,17 @@ export default function InputConsole({ onUpdate, isLoading, drivers, settings, o
     if (existing) {
       setDriverName(existing.name);
       setCarClass(existing.class);
+      setCarModel(existing.carModel ?? "");
+    } else {
+      setCarModel(""); // don't carry another entry's car over to a new one
     }
   };
+
+  // The entry this form points at (same car number and class), if it already exists.
+  const currentEntry = drivers.find(d =>
+    d.carNumber === carNumber.trim().toUpperCase() && d.class.trim().toUpperCase() === carClass.trim().toUpperCase()
+  );
+  const carModelChanged = !!currentEntry && carModel.trim() !== (currentEntry.carModel ?? "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +76,7 @@ export default function InputConsole({ onUpdate, isLoading, drivers, settings, o
       driverName: driverName.trim(),
       carNumber: carNumber.trim().toUpperCase(),
       carClass: carClass.trim().toUpperCase(),
+      carModel: carModel.trim(),
       ssNum: `SS${ssNum}`,
       recordedTime: isDnfDns ? dnfDnsType : recordedTime,
       penaltySec
@@ -127,6 +140,34 @@ export default function InputConsole({ onUpdate, isLoading, drivers, settings, o
             placeholder="Driver Name"
             required
           />
+        </div>
+
+        {/* Row 2b: Car (vehicle), optional */}
+        <div className="space-y-1">
+          <label className="text-(--text-secondary) flex items-center gap-1.5 uppercase font-black text-[8px] tracking-wider">
+            <Car size={10} className="text-(--accent)" /> Car (optional)
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={carModel}
+              onChange={(e) => setCarModel(e.target.value)}
+              maxLength={60}
+              className="flex-1 min-w-0 bg-(--bg-deep) border border-(--line) text-white px-2 py-1.5 focus:border-(--accent) focus:outline-none font-bold text-xs"
+              placeholder="e.g. AWD Turbo Corolla"
+            />
+            {carModelChanged && (
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() => currentEntry && onUpdateCarModel(currentEntry.id, carModel)}
+                className="shrink-0 flex items-center gap-1 px-2 border border-(--accent) text-(--accent) hover:bg-(--accent) hover:text-black uppercase font-black text-[8px] tracking-wider transition-colors disabled:opacity-50"
+                title="Save the car without entering a stage time"
+              >
+                <Save size={10} /> Save car
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="h-px bg-(--line)/10" />
