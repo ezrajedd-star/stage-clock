@@ -4,6 +4,7 @@
  */
 
 import { parseClock, type FactSheet } from './factSheet.js';
+import type { RallySheet } from './rallySheet.js';
 
 // Checks a generated report against its fact sheet before anyone sees it.
 // Every time, gap, position, place count and car number in the text must
@@ -44,7 +45,7 @@ const PLACES = /\b(\d{1,2})\s+(?:places?|positions?|spots?)\b/gi;
 
 const toCs = (seconds: number) => Math.round(seconds * 100);
 
-function collectFacts(sheet: FactSheet) {
+function collectFacts(sheet: FactSheet | RallySheet) {
   const cars = new Map<string, CarFacts>();
   const timesCs = new Set<number>();
   const secondsValues = new Set<number>(); // penalties and the DNF penalty, in centiseconds
@@ -53,33 +54,31 @@ function collectFacts(sheet: FactSheet) {
     if (!cars.has(n)) cars.set(n, { crews: new Set(), positions: new Set(), placeChanges: new Set() });
     return cars.get(n)!;
   };
+  const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 
-  // Every clock-formatted string anywhere in the sheet is an allowed time/gap.
+  // Walk the whole sheet (single-stage or whole-rally):
+  // - every clock-formatted string is an allowed time/gap;
+  // - every { car, crew } object registers the crew, and its positions
+  //   (position, previousPosition, from/to) and position changes for that car.
   const walk = (v: unknown) => {
     if (typeof v === 'string') {
       const m = v.match(/^\+?((?:\d{1,2}:)?\d{1,2}:\d{2}\.\d{2}|\d{1,2}\.\d{2})$/);
       if (m) timesCs.add(toCs(parseClock(m[1])));
     } else if (Array.isArray(v)) v.forEach(walk);
-    else if (v && typeof v === 'object') Object.values(v).forEach(walk);
+    else if (v && typeof v === 'object') {
+      const o = v as Record<string, unknown>;
+      if (typeof o.car === 'string' && typeof o.crew === 'string') {
+        const c = car(o.car);
+        c.crews.add(o.crew.toLowerCase());
+        for (const k of ['position', 'previousPosition', 'from', 'to']) if (isNum(o[k])) c.positions.add(o[k] as number);
+        if (isNum(o.positionChange)) c.placeChanges.add(Math.abs(o.positionChange));
+        if (isNum(o.from) && isNum(o.to)) c.placeChanges.add(Math.abs(o.from - o.to));
+        if (isNum(o.penaltySeconds) && o.penaltySeconds > 0) secondsValues.add(toCs(o.penaltySeconds));
+      }
+      Object.values(o).forEach(walk);
+    }
   };
   walk(sheet);
-
-  for (const scope of [...sheet.classes, sheet.overall]) {
-    for (const r of scope.stageResults) {
-      const c = car(r.car);
-      c.crews.add(r.crew.toLowerCase());
-      if (r.position !== null) c.positions.add(r.position);
-      if (r.penaltySeconds > 0) secondsValues.add(toCs(r.penaltySeconds));
-    }
-    for (const s of scope.standings) {
-      const c = car(s.car);
-      c.crews.add(s.crew.toLowerCase());
-      c.positions.add(s.position);
-      if (s.previousPosition !== null) c.positions.add(s.previousPosition);
-      if (s.positionChange !== null) c.placeChanges.add(Math.abs(s.positionChange));
-    }
-    for (const a of scope.awaitingResult) car(a.car).crews.add(a.crew.toLowerCase());
-  }
   const dnfPenalty = sheet.dnfRule.match(/plus (\d+(?:\.\d+)?)s/);
   if (dnfPenalty) secondsValues.add(toCs(Number(dnfPenalty[1])));
 
@@ -111,12 +110,19 @@ function sentenceBounds(text: string): [number, number][] {
   return bounds;
 }
 
-export function verifyDraft(draft: string, sheet: FactSheet): VerifyResult {
+export function verifyDraft(draft: string, sheet: FactSheet | RallySheet): VerifyResult {
   const facts = collectFacts(sheet);
+  const original = draft;
+  // Car models ("Turbo 1NZ Corolla", "K20 RWD Beetle") are not numbers to check: blank them
+  // out (same length, so positions in the text stay the same).
+  const vehicles = [...new Set(sheet.crews.map(c => c.vehicle).filter((v): v is string => !!v))].sort((a, b) => b.length - a.length);
+  for (const v of vehicles) {
+    draft = draft.replace(new RegExp(`(?<![\\p{L}\\d])${escapeRe(v)}(?![\\p{L}\\d])`, 'giu'), m => ' '.repeat(m.length));
+  }
   const issues: DraftIssue[] = [];
   let checked = 0;
   const add = (kind: IssueKind, start: number, end: number, message: string) =>
-    issues.push({ kind, text: draft.slice(start, end), start, end, message });
+    issues.push({ kind, text: original.slice(start, end), start, end, message });
 
   // Car and crew mentions, with positions in the text.
   const carMentions: { car: string; start: number; end: number }[] = [];

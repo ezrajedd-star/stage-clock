@@ -80,7 +80,12 @@ describe('fact sheet: lead change', () => {
 
   it('reports a leader extending the lead when there is no change', () => {
     const ext = cls(buildFactSheet([mk('1', 'ALPHA', 'A', [100, 100]), mk('2', 'BRAVO', 'A', [101, 103])], settings, 2), 'A');
-    expect(ext.storylines).toContainEqual({ type: 'lead_extended', leader: { car: '1', crew: 'ALPHA' }, second: { car: '2', crew: 'BRAVO' }, previousGapToSecond: '+00:01.00', gapToSecond: '+00:04.00', change: '+00:03.00' });
+    expect(ext.storylines).toContainEqual({ type: 'lead_extended', leader: { car: '1', crew: 'ALPHA' }, second: { car: '2', crew: 'BRAVO' }, previousGapToSecond: '+00:01.00', gapToSecond: '+00:04.00', change: '+00:03.00', rivalRetiredThisStage: false });
+  });
+
+  it('flags a lead that grew because the rival retired on the stage', () => {
+    const ext = cls(buildFactSheet([mk('1', 'ALPHA', 'A', [100, 100]), mk('2', 'BRAVO', 'A', [101, -1]), mk('3', 'CHARLIE', 'A', [130, 130])], settings, 2), 'A');
+    expect(ext.storylines).toContainEqual(expect.objectContaining({ type: 'lead_extended', rivalRetiredThisStage: true }));
   });
 });
 

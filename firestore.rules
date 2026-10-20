@@ -37,6 +37,7 @@ service cloud.firestore {
       return data.name is string && data.name.size() > 0 && data.name.size() <= 300
         && data.carNumber is string && data.carNumber.size() > 0 && data.carNumber.size() <= 100
         && data.class is string && data.class.size() > 0 && data.class.size() <= 200
+        && (!('carModel' in data) || (data.carModel is string && data.carModel.size() <= 60))
         && data.stageTimes is map
         && data.stagePenalties is map
         && data.totalTimeSeconds is number && data.totalTimeSeconds >= -2

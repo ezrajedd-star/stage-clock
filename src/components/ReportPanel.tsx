@@ -8,10 +8,11 @@ import { motion } from 'motion/react';
 import { FileText, X, Copy, Check, RefreshCw, ShieldCheck, AlertTriangle, Activity } from 'lucide-react';
 import type { Driver, Settings } from '../types';
 import { buildFactSheet } from '../lib/factSheet';
+import { buildRallySheet } from '../lib/rallySheet';
 import { verifyDraft } from '../lib/verifyDraft';
 import {
-  REPORT_FORMATS, REPORT_WRITERS, REPORT_ERRORS, MAX_NOTES_LENGTH, MAX_EVENT_NAME_LENGTH,
-  type ReportFormat, type ReportResponse, type ReportIssue, type ReportWriter,
+  REPORT_FORMATS, REPORT_WRITERS, REPORT_SCOPES, REPORT_ERRORS, MAX_NOTES_LENGTH, MAX_EVENT_NAME_LENGTH,
+  type ReportFormat, type ReportResponse, type ReportIssue, type ReportWriter, type ReportScope,
 } from '../lib/reportConfig';
 
 interface ReportPanelProps {
@@ -48,6 +49,7 @@ export default function ReportPanel({ drivers, settings, getIdToken, onSaveEvent
   const [stage, setStage] = useState<number>(stagesWithResults[stagesWithResults.length - 1] ?? 1);
   const [eventName, setEventName] = useState(settings.eventName ?? '');
   const [format, setFormat] = useState<ReportFormat>('summary');
+  const [scope, setScope] = useState<ReportScope>('stage');
   // Remember the operator's writer choice on this device.
   const [writer, setWriterState] = useState<ReportWriter>(() => {
     try {
@@ -73,7 +75,10 @@ export default function ReportPanel({ drivers, settings, getIdToken, onSaveEvent
   const liveCheck = useMemo(() => {
     if (!result) return null;
     if (draft === result.draft) return { ok: result.verified, checked: result.checked, issues: result.issues };
-    return verifyDraft(draft, buildFactSheet(drivers, settings, stage, eventName));
+    const sheet = result.scope === 'rally'
+      ? buildRallySheet(drivers, settings, stage, eventName)
+      : buildFactSheet(drivers, settings, stage, eventName);
+    return verifyDraft(draft, sheet);
   }, [draft, result, drivers, settings, stage, eventName]);
 
   const generate = async () => {
@@ -90,7 +95,7 @@ export default function ReportPanel({ drivers, settings, getIdToken, onSaveEvent
       const res = await fetch('/api/stage-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ stage, format, notes, eventName: eventName.trim(), hashtags, writer }),
+        body: JSON.stringify({ stage, format, notes, eventName: eventName.trim(), hashtags, writer, scope }),
       });
       const body = await res.json().catch(() => null);
       if (!res.ok || !body) {
@@ -150,11 +155,27 @@ export default function ReportPanel({ drivers, settings, getIdToken, onSaveEvent
           ) : (
             <>
               {/* Options */}
+              <div className="space-y-1">
+                <label className={label}>Covers</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {(Object.keys(REPORT_SCOPES) as ReportScope[]).map(sc => (
+                    <button
+                      key={sc}
+                      onClick={() => setScope(sc)}
+                      className={`text-[10px] px-3 py-1.5 border uppercase font-bold transition-all ${scope === sc ? 'bg-(--accent) text-black border-(--accent)' : 'text-(--text-secondary) border-(--line) hover:text-white'}`}
+                    >
+                      {REPORT_SCOPES[sc].label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[9px] text-(--text-subtle) font-bold uppercase leading-snug">{REPORT_SCOPES[scope].description}</p>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className={label}>Stage</label>
+                  <label className={label}>{scope === 'rally' ? 'Up to stage' : 'Stage'}</label>
                   <select value={stage} onChange={e => setStage(Number(e.target.value))} className={`${input} appearance-none`}>
-                    {stagesWithResults.map(s => <option key={s} value={s}>SS {s}</option>)}
+                    {stagesWithResults.map(s => <option key={s} value={s}>{scope === 'rally' && s > 1 ? `SS 1–${s}` : `SS ${s}`}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
@@ -172,7 +193,7 @@ export default function ReportPanel({ drivers, settings, getIdToken, onSaveEvent
                       onClick={() => setFormat(f)}
                       className={`text-[10px] px-3 py-1.5 border uppercase font-bold transition-all ${format === f ? 'bg-(--accent) text-black border-(--accent)' : 'text-(--text-secondary) border-(--line) hover:text-white'}`}
                     >
-                      {REPORT_FORMATS[f].label}
+                      {scope === 'rally' ? REPORT_FORMATS[f].rallyLabel : REPORT_FORMATS[f].label}
                     </button>
                   ))}
                   {format === 'social' && (
@@ -218,7 +239,7 @@ export default function ReportPanel({ drivers, settings, getIdToken, onSaveEvent
                 className="w-full h-10 bg-(--accent) hover:bg-white text-black font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all disabled:opacity-50 text-[10px]"
               >
                 {loading ? <Activity size={14} className="animate-spin" /> : result ? <RefreshCw size={14} /> : <FileText size={14} />}
-                {loading ? (writer === 'premium' ? 'Premium writer at work… up to a minute' : 'Writing & checking numbers…') : result ? 'Regenerate' : 'Generate report'}
+                {loading ? (writer === 'premium' ? `Premium writer at work… up to ${scope === 'rally' ? 'two minutes' : 'a minute'}` : 'Writing & checking numbers…') : result ? 'Regenerate' : 'Generate report'}
               </button>
 
               {error && (

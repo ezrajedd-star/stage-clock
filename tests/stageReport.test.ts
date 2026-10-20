@@ -58,6 +58,10 @@ describe('POST /api/stage-report', () => {
     expect(params.system).toContain('thrilling, electrifying');
     expect(params.system).toContain('Opinions about people in the notes');
     expect(params.system).toContain("Don't read out a results table");
+    expect(params.system).toContain('rivalRetiredThisStage');
+    expect(params.system).toContain('never quote it');
+    expect(params.system).toContain('"crews" ("vehicle")');
+    expect(params.system).toContain('10th and above in figures');
     expect(params.output_config).toEqual({ effort: 'high' });
     const user = params.messages[0].content as string;
     expect(user).toContain('SOCIAL POST');
@@ -74,6 +78,24 @@ describe('POST /api/stage-report', () => {
     expect(calls[0][1]).toMatchObject({ model: REPORT_WRITERS.standard.model, output_config: { effort: 'high' }, max_tokens: 16000 });
     expect(calls[1][1]).toMatchObject({ model: 'claude-opus-5-5', output_config: { effort: 'high' }, max_tokens: 16000, fallbacks: 'default' });
     expect([std.writer, prem.writer]).toEqual(['standard', 'premium']);
+  });
+
+  it('writes a whole-rally report from SS1 up to the chosen stage', async () => {
+    const d = deps();
+    const body = await (await handleStageReport(post({ stage: 2, format: 'summary', scope: 'rally', writer: 'premium' }), d)).json();
+    expect(body).toMatchObject({ scope: 'rally', stageLabel: 'SS1–SS2', verified: true });
+    const user = (d.createMessage as ReturnType<typeof vi.fn>).mock.calls[0][1].messages[0].content as string;
+    expect(user).toContain('RALLY REPORT');
+    expect(user).toContain('"kind":"rally"');
+    expect(user).toContain('"stageByStage"');
+    expect(user).toContain('rally report covering SS1–SS2 of Test Rally');
+  });
+
+  it('defaults to a single-stage report and rejects an unknown scope', async () => {
+    const body = await (await handleStageReport(post({ stage: 2, format: 'summary' }), deps())).json();
+    expect(body).toMatchObject({ scope: 'stage', stageLabel: 'SS2' });
+    expect((await handleStageReport(post({ stage: 2, format: 'summary', scope: 'season' }), deps())).status).toBe(400);
+    expect((await handleStageReport(post({ stage: 2, format: 'toString' }), deps())).status).toBe(400);
   });
 
   it('rejects an unknown writer', async () => {

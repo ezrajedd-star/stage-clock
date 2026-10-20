@@ -7,6 +7,7 @@ export interface Driver {
   id: string;
   name: string;
   carNumber: string;
+  carModel?: string; // the vehicle, e.g. "AWD Turbo Corolla" (CAR column)
   class: string;
   stageTimes: Record<string, number>; // SS# -> seconds
   stagePenalties: Record<string, number>; // SS# -> seconds

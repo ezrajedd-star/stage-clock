@@ -119,6 +119,21 @@ export default function App() {
     }
   };
 
+  // Saves only the CAR (vehicle) of an existing entry, without touching its times.
+  const handleUpdateCarModel = async (driverId: string, carModel: string) => {
+    if (!user) return;
+    setProcessing(true);
+    setError(null);
+    try {
+      await setDoc(doc(db, 'drivers', driverId), { carModel: carModel.trim(), updatedAt: serverTimestamp() }, { merge: true });
+    } catch (err: any) {
+      setError(err.message);
+      handleFirestoreError(err, OperationType.WRITE, `drivers/${driverId}`);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const handleDeleteDriver = async (driverId: string) => {
     if (!user) return;
     setProcessing(true);
@@ -138,6 +153,7 @@ export default function App() {
     driverName: string;
     carNumber: string;
     carClass: string;
+    carModel: string;
     ssNum: string;
     recordedTime: string;
     penaltySec: number;
@@ -148,6 +164,7 @@ export default function App() {
       const driverName = updateData.driverName.trim();
       const carNumber = updateData.carNumber.trim().toUpperCase();
       const carClass = updateData.carClass.trim().toUpperCase();
+      const carModel = updateData.carModel.trim();
       const { ssNum, recordedTime, penaltySec } = updateData;
       
       const ssIndex = ssNum.replace("SS", "");
@@ -176,6 +193,7 @@ export default function App() {
         driverData = {
           name: driverName,
           carNumber: data.carNumber,
+          carModel: carModel || data.carModel || '',
           class: data.class,
           stageTimes: newStageTimes,
           stagePenalties: newStagePenalties,
@@ -191,6 +209,7 @@ export default function App() {
         driverData = {
           name: driverName,
           carNumber: carNumber,
+          carModel,
           class: carClass,
           stageTimes,
           stagePenalties,
@@ -317,6 +336,7 @@ export default function App() {
             <div className="flex-1 md:overflow-y-auto custom-scrollbar">
               <InputConsole 
                 onUpdate={handleUpdate} 
+                onUpdateCarModel={handleUpdateCarModel}
                 isLoading={processing} 
                 drivers={drivers}
                 settings={settings}

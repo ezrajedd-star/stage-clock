@@ -1,6 +1,6 @@
 # Stage Clock
 
-Stage Clock is a rally timing and results app for events of up to 12 special stages. Timing operators sign in with Google and use the input terminal to enter each car's stage time (MM:SS.SS or H:MM:SS.SS), penalties and DNF/DNS results. The results board updates live for every viewer. It shows stage times grouped by class with the fastest and slowest highlighted, and a leaderboard (by class or overall) with gaps to the leader. DNF/DNS results are replaced with the slowest time in the class (or overall) plus a configurable penalty. Operators can disqualify (hide/show) entries, export the results to CSV, and draft stage reports with the Stage Report Writer. Data is stored in Cloud Firestore, and the app can be installed as a PWA.
+Stage Clock is a rally timing and results app for events of up to 12 special stages. Timing operators sign in with Google and use the input terminal to enter each car's stage time (MM:SS.SS or H:MM:SS.SS), penalties, DNF/DNS results and the car each crew drives (CAR column; "Save car" updates it without entering a time). The results board updates live for every viewer. It shows stage times grouped by class with the fastest and slowest highlighted, and a leaderboard (by class or overall) with gaps to the leader. DNF/DNS results are replaced with the slowest time in the class (or overall) plus a configurable penalty; only official entries count, so disqualified (hidden) rows never set that slowest time. Operators can disqualify (hide/show) entries, export the results to CSV, and draft stage reports with the Stage Report Writer. Data is stored in Cloud Firestore, and the app can be installed as a PWA.
 
 Originally built in Google AI Studio.
 
@@ -39,11 +39,11 @@ The site is hosted on Vercel at https://stage-clock-rho.vercel.app/. Every push 
 
 ## Stage Report Writer
 
-Operators get a **Report** button in the results toolbar. Pick a stage, the format (Stage summary or Social post), optionally add notes (for example "car 7 puncture at km 4"), and generate. The draft can be edited, copied and regenerated.
+Operators get a **Report** button in the results toolbar. Choose what the report covers (**One stage**, or the **Whole rally** from SS1 up to the chosen stage), the format (summary or social post), optionally add notes (for example "car 7 puncture at km 4"), and generate. The draft can be edited, copied and regenerated.
 
 How accuracy is protected:
 
-1. **Fact sheet in code** (`src/lib/factSheet.ts`): stage results, class and overall standings, gaps, position changes, ties, penalties, DNF/DNS, crews still awaiting a time, and rule-based storylines are computed from the same calculation the board uses (`src/lib/standings.ts`), with times formatted exactly as the board shows them.
+1. **Fact sheet in code** (`src/lib/factSheet.ts`): stage results, class and overall standings, gaps, position changes, ties, penalties, DNF/DNS, crews still awaiting a time, and rule-based storylines are computed from the same calculation the board uses (`src/lib/standings.ts`), with times formatted exactly as the board shows them, plus each crew's car. Whole-rally reports use `src/lib/rallySheet.ts`, built from the per-stage fact sheets: stage-by-stage winners, leaders and retirements, lead history, stage-win tallies, biggest climbs and current standings.
 2. **Claude writes the prose** (`api/stage-report.ts` → `src/server/stageReport.ts`) from the fact sheet and the operator's notes only. The operator picks a **Writer**: **Standard** (`claude-sonnet-5-5`, fast, a few US cents per report) or **Premium** (`claude-opus-5-5`, the strongest writer, slower and a few times the cost). Writers are defined in `REPORT_WRITERS` in `src/lib/reportConfig.ts`; the choice is remembered on each device. `vercel.json` allows the function up to 300 seconds so a Premium report plus its one correction pass can finish. The system prompt is in `src/lib/reportPrompt.ts`.
 3. **Number check** (`src/lib/verifyDraft.ts`): every time, gap, penalty, position, place count and car number in the draft is checked against the fact sheet, and crew names must sit next to their own car number. On a mismatch the server regenerates once with the list of problems. If it still fails, the panel shows the draft as **Not verified** with the problem items highlighted. Edits are re-checked live.
 

@@ -44,7 +44,8 @@ export type Storyline =
   | { type: 'stage_winner'; cars: string[]; crews: string[]; time: string; tied: boolean; marginToNext: string | null; stageWinsThisEvent: number[] }
   | { type: 'first_stage_win'; car: string; crew: string }
   | { type: 'lead_change'; newLeader: { car: string; crew: string }; previousLeader: { car: string; crew: string }; gapToSecond: string | null }
-  | { type: 'lead_extended' | 'lead_reduced' | 'lead_unchanged'; leader: { car: string; crew: string }; second: { car: string; crew: string }; previousGapToSecond: string; gapToSecond: string; change: string }
+  // rivalRetiredThisStage: the crew in (or previously in) second had a DNF/DNS on this stage, so the gap moved because of that, not the leader's pace.
+  | { type: 'lead_extended' | 'lead_reduced' | 'lead_unchanged'; leader: { car: string; crew: string }; second: { car: string; crew: string }; previousGapToSecond: string; gapToSecond: string; change: string; rivalRetiredThisStage: boolean }
   | { type: 'leader_after_first_stage'; leader: { car: string; crew: string } }
   | { type: 'shared_lead'; cars: string[]; crews: string[] }
   | { type: 'closest_gap'; ahead: { car: string; crew: string; position: number }; behind: { car: string; crew: string; position: number }; gap: string }
@@ -69,7 +70,16 @@ export interface ScopeSheet {
   storylines: Storyline[];
 }
 
+// Every crew in the results, with the car they drive (null when not entered).
+export interface CrewInfo {
+  car: string;
+  crew: string;
+  class: string;
+  vehicle: string | null;
+}
+
 export interface FactSheet {
+  kind: 'stage';
   event: { name: string | null };
   stage: { number: number; label: string };
   provisional: boolean;        // true while some crews have no result for this stage
@@ -78,6 +88,7 @@ export interface FactSheet {
   overall: ScopeSheet;
   eventStorylines: Storyline[];
   headlines: Headline[];     // most newsworthy first, chosen by fixed rules
+  crews: CrewInfo[];
   disqualified: { car: string; crew: string; class: string }[];
   formatNotes: string;
 }
@@ -219,7 +230,12 @@ function storylinesFor(
         const before = prevSecond.gapToLeader;
         const toCs = (g: string) => Math.round(parseClock(g.replace('+', '')) * 100);
         const type = toCs(now) > toCs(before) ? 'lead_extended' : toCs(now) < toCs(before) ? 'lead_reduced' : 'lead_unchanged';
-        out.push({ type, leader: who(leader), second: who(second), previousGapToSecond: before, gapToSecond: now, change: fmtGap(Math.abs(toCs(now) - toCs(before)) / 100) });
+        const retired = (e: { car: string; crew: string }) => results.some(r => r.car === e.car && r.crew === e.crew && (r.status === 'DNF' || r.status === 'DNS'));
+        out.push({
+          type, leader: who(leader), second: who(second), previousGapToSecond: before, gapToSecond: now,
+          change: fmtGap(Math.abs(toCs(now) - toCs(before)) / 100),
+          rivalRetiredThisStage: retired(second) || retired(prevSecond),
+        });
       }
     }
   }
@@ -280,7 +296,7 @@ function buildScope(
   inScope: (d: Driver) => boolean,
 ): ScopeSheet {
   const stagesUpTo = (n: number) => Array.from({ length: n }, (_, i) => i + 1);
-  // Stats use every entry (incl. DSQ), exactly like the board; rankings exclude DSQ.
+  // Same calculation as the board (DSQ rows don't count towards DNF times); rankings exclude DSQ.
   const current = computeResults(all, settings, stagesUpTo(stage)).processed.filter(d => !d.isHidden && inScope(d));
   const stageResults = stageResultsFor(current, stage);
 
@@ -382,6 +398,7 @@ export function buildFactSheet(drivers: Driver[], settings: Settings, stage: num
   const eventStorylines = buildEventStorylines(classes, overall);
   const method = settings.dnfCalculationMethod === 'overall' ? 'slowest time on the stage overall' : 'slowest time on the stage in their class';
   return {
+    kind: 'stage',
     event: { name: eventName?.trim() || null },
     stage: { number: stage, label: `SS${stage}` },
     provisional: overall.awaitingResult.length > 0,
@@ -390,9 +407,18 @@ export function buildFactSheet(drivers: Driver[], settings: Settings, stage: num
     overall,
     eventStorylines,
     headlines: rankHeadlines(classes, overall, eventStorylines),
+    crews: crewRoster(drivers),
     disqualified: drivers.filter(d => d.isHidden).map(d => ({ car: d.carNumber, crew: crewOf(d), class: d.class })),
     formatNotes: 'Stage times are M:SS.ss as shown on the results board (leading "00:" dropped). Totals and gaps are MM:SS.ss (H:MM:SS.ss over an hour). Gaps start with "+". Positions are ranked within the class (classes) or across all classes (overall). Tied crews share a position.',
   };
+}
+
+// Official crews with their car, ordered by car number.
+export function crewRoster(drivers: Driver[]): CrewInfo[] {
+  return drivers
+    .filter(d => !d.isHidden && Object.keys(d.stageTimes).length > 0)
+    .sort((a, b) => a.carNumber.localeCompare(b.carNumber, undefined, { numeric: true }))
+    .map(d => ({ car: d.carNumber, crew: crewOf(d), class: d.class, vehicle: d.carModel?.trim() || null }));
 }
 
 // True when the stage has at least one result (time, DNF or DNS) in any class.

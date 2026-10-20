@@ -65,7 +65,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
   );
 
   const exportToCSV = () => {
-    const headers = ['Pos', 'Car', 'Driver', 'Class', ...visibleStages.map(s => `SS${s}`), 'Total Time'];
+    const headers = ['Pos', 'Car No', 'Driver', 'Car', 'Class', ...visibleStages.map(s => `SS${s}`), 'Total Time'];
     const rows = processedDrivers
       .filter(d => showHidden || !d.isHidden)
       .sort((a, b) => a.effectiveTotal - b.effectiveTotal)
@@ -73,6 +73,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
         index + 1,
         d.carNumber,
         `"${d.name}"`,
+        `"${(d.carModel ?? '').replace(/"/g, '""')}"`,
         `"${d.class}"`,
         ...visibleStages.map(s => {
           const time = d.stageTimes[s.toString()];
@@ -197,6 +198,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                       <th className={`px-1 sm:px-2 py-1.5 font-black uppercase tracking-widest text-center text-(--text-secondary) ${pin ? 'sticky left-0 z-[2] bg-(--bg-panel) w-10 min-w-10 max-w-10' : 'w-10 sm:w-12'}`}>POS</th>
                       <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${pin ? 'sticky left-10 z-[2] bg-(--bg-panel) w-12 min-w-12 max-w-12' : 'w-10 sm:w-12'}`}>#</th>
                       <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${pin ? 'sticky left-22 z-[2] bg-(--bg-panel) w-28 min-w-28 max-w-28 border-r border-(--line)/30' : ''}`}>DRIVER</th>
+                      <th className="px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest">CAR</th>
                       {viewMode === 'leaderboard' && (
                         <th className="hidden sm:table-cell px-3 py-1.5 font-black uppercase tracking-widest text-center w-16">STAGES</th>
                       )}
@@ -272,6 +274,14 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                                   ))}
                                 </div>
                               )}
+                            </td>
+                            <td className="px-2 sm:px-3 py-0.5">
+                              <div
+                                className={`text-[9px] font-bold leading-tight ${d.carModel ? 'text-white/70' : 'text-(--text-subtle)'} ${viewMode === 'leaderboard' ? 'break-words max-w-[96px] sm:max-w-[160px]' : 'whitespace-nowrap'}`}
+                                title={d.carModel}
+                              >
+                                {d.carModel || '—'}
+                              </div>
                             </td>
                             {viewMode === 'leaderboard' && (
                               <td className="hidden sm:table-cell px-3 py-0.5 text-center">
