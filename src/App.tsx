@@ -13,7 +13,10 @@ import {
   query, 
   orderBy, 
   serverTimestamp, 
-  getDoc 
+  getDoc,
+  getDocs,
+  writeBatch,
+  deleteField
 } from 'firebase/firestore';
 import { db, auth, signIn, handleFirestoreError } from './services/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -21,9 +24,11 @@ import { Driver, OperationType, Settings } from './types';
 import { timeToSeconds, calculateTotalTime } from './lib/rallyUtils';
 import InputConsole from './components/InputConsole';
 import ReportPanel from './components/ReportPanel';
+import ShareModal from './components/ShareModal';
+import ResetEventDialog from './components/ResetEventDialog';
 import { MasterEntryList, ClassStandings } from './components/ResultsDisplay';
 import { motion } from 'motion/react';
-import { Activity, LogIn, Trophy, Timer, Shield, Settings as SettingsIcon } from 'lucide-react';
+import { Activity, LogIn, Trophy, Timer, Shield, Settings as SettingsIcon, QrCode, RotateCcw } from 'lucide-react';
 
 // Must match the admin email in firestore.rules.
 const ADMIN_EMAIL = 'ezrajedd@gmail.com';
@@ -38,6 +43,10 @@ export default function App() {
   const [showHidden, setShowHidden] = useState(false);
   const [isOperator, setIsOperator] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [showReset, setShowReset] = useState(false);
+  // Only the admin can wipe the event (the reset button is not shown to other operators).
+  const isAdmin = !!user?.emailVerified && user.email?.toLowerCase() === ADMIN_EMAIL;
 
   // Operators (admin or listed in /operators) get the input terminal and row controls.
   useEffect(() => {
@@ -132,6 +141,20 @@ export default function App() {
     } finally {
       setProcessing(false);
     }
+  };
+
+  // Starts a new event: deletes every driver entry (times, penalties, DNF/DNS) and clears
+  // the event name. Operators and the DNF settings are kept. Errors go back to the dialog.
+  const handleResetEvent = async () => {
+    const snapshot = await getDocs(collection(db, 'drivers'));
+    // Firestore batches hold at most 500 writes.
+    for (let i = 0; i < snapshot.docs.length; i += 400) {
+      const batch = writeBatch(db);
+      snapshot.docs.slice(i, i + 400).forEach(d => batch.delete(d.ref));
+      await batch.commit();
+    }
+    await setDoc(doc(db, 'settings', 'global'), { eventName: deleteField() }, { merge: true });
+    setError(null);
   };
 
   const handleDeleteDriver = async (driverId: string) => {
@@ -271,7 +294,14 @@ export default function App() {
            </div>
         </div>
 
-        <div className="flex items-center gap-8 text-right shrink-0">
+        <div className="flex items-center gap-3 md:gap-8 text-right shrink-0">
+          <button
+            onClick={() => setShowShare(true)}
+            className="flex items-center gap-1.5 border border-(--line) hover:border-(--accent) text-white hover:text-(--accent) px-2 md:px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-widest transition-colors"
+            aria-label="Share Stage Clock with a QR code"
+          >
+            <QrCode size={14} /> <span>Share</span>
+          </button>
           <div className="hidden md:flex border-r border-(--line) pr-8 items-center gap-3">
             <div>
               <p className="text-[10px] text-(--text-secondary) uppercase mb-1">Status</p>
@@ -342,10 +372,26 @@ export default function App() {
                 settings={settings}
                 onUpdateSettings={handleUpdateSettings}
               />
+              {isAdmin && (
+                <div className="px-3 pb-3">
+                  <button
+                    onClick={() => setShowReset(true)}
+                    className="w-full h-8 flex items-center justify-center gap-1.5 border border-red-500/40 text-red-400/80 hover:text-red-400 hover:border-red-500 hover:bg-red-500/10 font-mono uppercase font-black text-[9px] tracking-widest transition-colors"
+                  >
+                    <RotateCcw size={11} /> Reset event data
+                  </button>
+                </div>
+              )}
             </div>
           </aside>
         )}
       </main>
+
+      {showShare && <ShareModal onClose={() => setShowShare(false)} />}
+
+      {isAdmin && showReset && (
+        <ResetEventDialog drivers={drivers} settings={settings} onConfirm={handleResetEvent} onClose={() => setShowReset(false)} />
+      )}
 
       {/* Stage Report Writer (operators only) */}
       {user && isOperator && showReport && (
