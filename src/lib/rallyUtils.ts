@@ -55,6 +55,11 @@ export function secondsToTime(totalSeconds: number): string {
   return `${mStr}:${sStr}`;
 }
 
+// Gap for the board, WRC style without leading zeros: "+0.425", "+3.326", "+20.096", "+1:13.040".
+export function formatGap(seconds: number): string {
+  return `+${secondsToTime(seconds).replace(/^00:0?(?=\d)/, '').replace(/^0(\d:)/, '$1')}`;
+}
+
 export function formatPenalty(penaltySeconds: number): string {
   if (penaltySeconds <= 0) return "";
   return `+${secondsToTime(penaltySeconds)}`;

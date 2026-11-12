@@ -5,7 +5,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Driver, Settings } from '../types';
-import { secondsToTime, formatPenalty } from '../lib/rallyUtils';
+import { secondsToTime, formatPenalty, formatGap } from '../lib/rallyUtils';
 import { ALL_STAGES, getClasses, computeClassStats, computeOverallStats, computeProcessedDrivers } from '../lib/standings';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Clock, Hash, Download, ShieldOff, Eye, List, LayoutGrid, Trash2, AlertTriangle, FileText } from 'lucide-react';
@@ -54,21 +54,26 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
   // In stage view, POS / # / DRIVER stay pinned while stage columns scroll sideways.
   const pin = viewMode === 'stages';
   // Fixed column widths, shared by headers and cells, so every class table lines up. In stage
-  // view a filler column takes the spare room; on the leaderboard only DRIVER flexes.
+  // view a filler column takes the spare room; on the leaderboard only DRIVER flexes. Phones get
+  // tighter widths (names and cars wrap instead) so the stage times start sooner.
   const W = pin
     ? {
-        pos: 'w-10 min-w-10 max-w-10', num: 'w-12 min-w-12 max-w-12', driver: 'w-28 min-w-28 max-w-28',
-        car: 'w-40 min-w-40 max-w-40', total: 'w-24 min-w-24 max-w-24', diff: 'w-24 min-w-24 max-w-24',
+        pos: 'w-8 min-w-8 max-w-8 sm:w-10 sm:min-w-10 sm:max-w-10',
+        num: 'w-9 min-w-9 max-w-9 sm:w-12 sm:min-w-12 sm:max-w-12',
+        driver: 'w-[76px] min-w-[76px] max-w-[76px] sm:w-28 sm:min-w-28 sm:max-w-28',
+        car: 'w-14 min-w-14 max-w-14 sm:w-40 sm:min-w-40 sm:max-w-40',
+        total: 'w-[60px] min-w-[60px] max-w-[60px] sm:w-24 sm:min-w-24 sm:max-w-24',
+        diff: 'w-[54px] min-w-[54px] max-w-[54px] sm:w-24 sm:min-w-24 sm:max-w-24',
       }
     : {
-        pos: 'w-9 min-w-9 max-w-9 sm:w-10 sm:min-w-10 sm:max-w-10',
-        num: 'w-10 min-w-10 max-w-10 sm:w-12 sm:min-w-12 sm:max-w-12',
-        driver: 'w-full max-w-0', // takes the remaining width; long names truncate
-        car: 'w-[76px] min-w-[76px] max-w-[76px] sm:w-28 sm:min-w-28 sm:max-w-28',
-        total: 'w-[68px] min-w-[68px] max-w-[68px] sm:w-20 sm:min-w-20 sm:max-w-20',
-        diff: 'w-[68px] min-w-[68px] max-w-[68px] sm:w-20 sm:min-w-20 sm:max-w-20',
+        pos: 'w-8 min-w-8 max-w-8 sm:w-10 sm:min-w-10 sm:max-w-10',
+        num: 'w-9 min-w-9 max-w-9 sm:w-12 sm:min-w-12 sm:max-w-12',
+        driver: 'w-full', // takes the remaining width; names wrap, never cut
+        car: 'w-16 min-w-16 max-w-16 sm:w-28 sm:min-w-28 sm:max-w-28',
+        total: 'w-[60px] min-w-[60px] max-w-[60px] sm:w-20 sm:min-w-20 sm:max-w-20',
+        diff: 'w-[54px] min-w-[54px] max-w-[54px] sm:w-20 sm:min-w-20 sm:max-w-20',
       };
-  const SS_W = 'w-[72px] min-w-[72px] max-w-[72px]';
+  const SS_W = 'w-16 min-w-16 max-w-16 sm:w-[72px] sm:min-w-[72px] sm:max-w-[72px]';
 
   const classes = useMemo(() => getClasses(drivers), [drivers]);
 
@@ -212,14 +217,14 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                         <th className="px-2 py-1.5 font-black uppercase tracking-widest text-[8px] w-16 min-w-16 max-w-16 text-center">OPS</th>
                       )}
                       <th className={`px-1 sm:px-2 py-1.5 font-black uppercase tracking-widest text-center text-(--text-secondary) ${W.pos} ${pin ? 'sticky left-0 z-[2] bg-(--bg-panel)' : ''}`}>POS</th>
-                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${W.num} ${pin ? 'sticky left-10 z-[2] bg-(--bg-panel)' : ''}`}>#</th>
-                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${W.driver} ${pin ? 'sticky left-22 z-[2] bg-(--bg-panel) border-r border-(--line)/30' : ''}`}>DRIVER</th>
-                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${W.car}`}>CAR</th>
+                      <th className={`px-1 sm:px-3 py-1.5 font-black uppercase tracking-widest ${W.num} ${pin ? 'sticky left-8 sm:left-10 z-[2] bg-(--bg-panel)' : ''}`}>#</th>
+                      <th className={`px-1.5 sm:px-3 py-1.5 font-black uppercase tracking-widest ${W.driver} ${pin ? 'sticky left-[68px] sm:left-22 z-[2] bg-(--bg-panel) border-r border-(--line)/30' : ''}`}>DRIVER</th>
+                      <th className={`px-1.5 sm:px-3 py-1.5 font-black uppercase tracking-widest ${W.car}`}>CAR</th>
                       {viewMode === 'leaderboard' && (
                         <th className="hidden sm:table-cell px-3 py-1.5 font-black uppercase tracking-widest text-center w-16 min-w-16 max-w-16">STAGES</th>
                       )}
-                      <th className={`px-1.5 sm:px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--accent) ${W.total}`}>TOTAL</th>
-                      <th className={`px-1.5 sm:px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--text-secondary) border-(--line)/20 ${W.diff} ${pin ? 'border-r' : ''}`}>DIFF</th>
+                      <th className={`px-1 sm:px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--accent) ${W.total}`}>TOTAL</th>
+                      <th className={`px-1 sm:px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--text-secondary) border-(--line)/20 ${W.diff} ${pin ? 'border-r' : ''}`}>DIFF</th>
                       {viewMode === 'stages' && visibleStages.map(s => (
                         <th key={s} className={`px-1 py-1.5 font-black uppercase tracking-widest text-center border-r border-(--line)/10 ${SS_W}`}>SS{s}</th>
                       ))}
@@ -237,7 +242,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                           if (isLeader) diff = "LEADER";
                           else {
                             const gap = d.effectiveTotal - leader.effectiveTotal;
-                            diff = `+${secondsToTime(gap)}`;
+                            diff = formatGap(gap);
                           }
                         }
 
@@ -276,11 +281,12 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                             <td className={`px-1 sm:px-2 py-0.5 text-center font-bold text-[10px] tabular-nums ${getPositionStyle(index + 1)} ${W.pos} ${pin ? 'sticky left-0 z-[1] bg-inherit' : ''}`}>
                               {getOrdinal(index + 1)}
                             </td>
-                            <td className={`px-2 sm:px-3 py-0.5 font-black text-(--accent) italic ${viewMode === 'leaderboard' ? 'text-sm' : 'text-base'} ${W.num} ${pin ? 'sticky left-10 z-[1] bg-inherit' : ''}`}>
+                            <td className={`px-1 sm:px-3 py-0.5 font-black text-(--accent) italic text-sm ${pin ? 'sm:text-base' : ''} ${W.num} ${pin ? 'sticky left-8 sm:left-10 z-[1] bg-inherit' : ''}`}>
                               {d.carNumber}
                             </td>
-                            <td className={`px-2 sm:px-3 py-0.5 min-w-0 ${W.driver} ${pin ? 'sticky left-22 z-[1] bg-inherit border-r border-(--line)/30' : ''}`}>
-                              <div className="font-black text-white uppercase text-[10px] leading-tight tabular-nums truncate max-w-[100px]" title={d.name}>{d.name}</div>
+                            <td className={`px-1.5 sm:px-3 py-1 ${W.driver} ${pin ? 'sticky left-[68px] sm:left-22 z-[1] bg-inherit border-r border-(--line)/30' : ''}`}>
+                              {/* Full name, wrapped onto more lines when needed (never cut off). */}
+                              <div className="font-black text-white uppercase text-[10px] leading-tight tabular-nums [overflow-wrap:anywhere]">{d.name}</div>
                               {isOverall && (
                                 <div className="text-[8px] font-bold uppercase tracking-wider text-(--text-secondary) leading-tight">{d.class}</div>
                               )}
@@ -297,9 +303,9 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                                 </div>
                               )}
                             </td>
-                            <td className={`px-2 sm:px-3 py-0.5 ${W.car}`}>
+                            <td className={`px-1.5 sm:px-3 py-0.5 ${W.car}`}>
                               <div
-                                className={`text-[9px] font-bold leading-tight ${d.carModel ? 'text-white/70' : 'text-(--text-subtle)'} ${pin ? 'truncate' : 'break-words'}`}
+                                className={`text-[9px] font-bold leading-tight [overflow-wrap:anywhere] ${d.carModel ? 'text-white/70' : 'text-(--text-subtle)'} ${pin ? 'sm:truncate' : ''}`}
                                 title={d.carModel}
                               >
                                 {d.carModel || '—'}
@@ -312,12 +318,12 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                                 </div>
                               </td>
                             )}
-                            <td className={`px-1.5 sm:px-3 py-0.5 text-right whitespace-nowrap ${W.total}`}>
-                              <div className={`font-black ${viewMode === 'leaderboard' ? 'text-[11px]' : 'text-[12px]'} ${dnfDnsCount > 0 ? 'text-red-400' : 'text-(--accent)'}`}>
+                            <td className={`px-1 sm:px-3 py-0.5 text-right whitespace-nowrap ${W.total}`}>
+                              <div className={`font-black text-[11px] ${pin ? 'sm:text-[12px]' : ''} ${dnfDnsCount > 0 ? 'text-red-400' : 'text-(--accent)'}`}>
                                 {secondsToTime(d.effectiveTotal)}
                               </div>
                             </td>
-                            <td className={`px-1.5 sm:px-3 py-0.5 text-right whitespace-nowrap border-(--line)/20 ${W.diff} ${pin ? 'border-r' : ''}`}>
+                            <td className={`px-1 sm:px-3 py-0.5 text-right whitespace-nowrap border-(--line)/20 ${W.diff} ${pin ? 'border-r' : ''}`}>
                               <div className={`text-[9px] font-bold ${isLeader ? 'text-(--accent-ready)' : 'text-(--text-secondary)'}`}>
                                 {diff}
                               </div>
