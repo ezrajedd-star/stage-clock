@@ -5,7 +5,7 @@
 
 import type { Driver, Settings } from '../types';
 import { computeResults, classKey, type ProcessedDriver } from './standings.js';
-import { secondsToTime } from './rallyUtils.js';
+import { secondsToTime, toMs } from './rallyUtils.js';
 
 // Fact sheet for the Stage Report Writer. Everything a report may state is
 // computed here, in code, from the same calculation the results board uses.
@@ -22,7 +22,7 @@ export interface StageResultEntry {
   status: ResultStatus;
   stageTime: string | null;    // incl. penalty, as on the board, e.g. "02:08.69"
   penaltySeconds: number;
-  gapToStageWinner: string | null; // e.g. "+00:01.23"; "+00:00.00" for the winner
+  gapToStageWinner: string | null; // e.g. "+00:01.234"; "+00:00.000" for the winner
   classifiedTime: string | null;   // DNF/DNS only: substituted time counted in the total
   dropped: boolean;            // the operator dropped this run: it stands on the stage but not in the crew's total
 }
@@ -34,7 +34,7 @@ export interface StandingEntry {
   crew: string;
   class: string;
   totalTime: string;           // cumulative after this stage, as on the board
-  gapToLeader: string;         // "+00:00.00" for the leader
+  gapToLeader: string;         // "+00:00.000" for the leader
   previousPosition: number | null; // after the previous stage, if classified then
   positionChange: number | null;   // + = places gained, - = places lost
   stagesWithResult: number;
@@ -233,12 +233,12 @@ function storylinesFor(
       if (second && prevSecond) {
         const now = second.gapToLeader;
         const before = prevSecond.gapToLeader;
-        const toCs = (g: string) => Math.round(parseClock(g.replace('+', '')) * 100);
-        const type = toCs(now) > toCs(before) ? 'lead_extended' : toCs(now) < toCs(before) ? 'lead_reduced' : 'lead_unchanged';
+        const gapMs = (g: string) => toMs(parseClock(g.replace('+', '')));
+        const type = gapMs(now) > gapMs(before) ? 'lead_extended' : gapMs(now) < gapMs(before) ? 'lead_reduced' : 'lead_unchanged';
         const retired = (e: { car: string; crew: string }) => results.some(r => r.car === e.car && r.crew === e.crew && (r.status === 'DNF' || r.status === 'DNS'));
         out.push({
           type, leader: who(leader), second: who(second), previousGapToSecond: before, gapToSecond: now,
-          change: fmtGap(Math.abs(toCs(now) - toCs(before)) / 100),
+          change: fmtGap(Math.abs(gapMs(now) - gapMs(before)) / 1000),
           rivalRetiredThisStage: retired(second) || retired(prevSecond),
         });
       }
@@ -251,14 +251,14 @@ function storylinesFor(
   let best = Infinity;
   for (let i = 1; i < top.length; i++) {
     const gap = parseClock(top[i].gapToLeader.replace('+', '')) - parseClock(top[i - 1].gapToLeader.replace('+', ''));
-    const cs = Math.round(gap * 100);
-    if (cs < best) {
-      best = cs;
+    const ms = toMs(gap);
+    if (ms < best) {
+      best = ms;
       closest = {
         type: 'closest_gap',
         ahead: { ...who(top[i - 1]), position: top[i - 1].position },
         behind: { ...who(top[i]), position: top[i].position },
-        gap: fmtGap(cs / 100),
+        gap: fmtGap(ms / 1000),
       };
     }
   }
@@ -285,7 +285,7 @@ function storylinesFor(
   return out;
 }
 
-// Parses the board's display formats back to seconds ("MM:SS.SS", "H:MM:SS.SS", "SS.SS").
+// Parses the board's display formats back to seconds ("MM:SS.sss", "H:MM:SS.sss", "SS.sss").
 export function parseClock(text: string): number {
   const parts = text.trim().split(':').map(Number);
   if (parts.some(Number.isNaN)) return NaN;
@@ -414,7 +414,7 @@ export function buildFactSheet(drivers: Driver[], settings: Settings, stage: num
     headlines: rankHeadlines(classes, overall, eventStorylines),
     crews: crewRoster(drivers),
     disqualified: drivers.filter(d => d.isHidden).map(d => ({ car: d.carNumber, crew: crewOf(d), class: d.class })),
-    formatNotes: 'Stage times are M:SS.ss as shown on the results board (leading "00:" dropped). Totals and gaps are MM:SS.ss (H:MM:SS.ss over an hour). Gaps start with "+". Positions are ranked within the class (classes) or across all classes (overall). Tied crews share a position.',
+    formatNotes: 'Stage times are M:SS.sss as shown on the results board (leading "00:" dropped). Totals and gaps are MM:SS.sss (H:MM:SS.sss over an hour). Gaps start with "+". Positions are ranked within the class (classes) or across all classes (overall). Tied crews share a position.',
   };
 }
 

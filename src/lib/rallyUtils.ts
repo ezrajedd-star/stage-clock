@@ -4,8 +4,8 @@
  */
 
 /**
- * Converts MM:SS.SS string to total seconds.
- * Supports MM:SS.SS or H:MM:SS.SS
+ * Converts MM:SS.sss string to total seconds.
+ * Supports MM:SS.sss or H:MM:SS.sss (any number of decimals)
  */
 export function timeToSeconds(timeStr: string): number {
   if (!timeStr) return 0;
@@ -13,35 +13,41 @@ export function timeToSeconds(timeStr: string): number {
   const parts = timeStr.trim().split(':').map(Number);
   
   if (parts.length === 3) {
-    // HH:MM:SS.SS
+    // HH:MM:SS.sss
     const [h, m, s] = parts;
     return (h * 3600) + (m * 60) + s;
   } else if (parts.length === 2) {
-    // MM:SS.SS
+    // MM:SS.sss
     const [m, s] = parts;
     return (m * 60) + s;
   } else if (parts.length === 1) {
-    // SS.SS
+    // SS.sss
     return parts[0];
   }
   
   return 0;
 }
 
+// Times are kept to the millisecond (the timing machine gives 3 decimals).
+export const TIME_DECIMALS = 3;
+export const toMs = (seconds: number) => Math.round(seconds * 1000);
+
 /**
- * Converts total seconds to MM:SS.SS or H:MM:SS.SS format.
+ * Converts total seconds to MM:SS.sss or H:MM:SS.sss format.
  */
 export function secondsToTime(totalSeconds: number): string {
   if (totalSeconds === -1) return "DNF";
   if (totalSeconds === -2) return "DNS";
-  if (totalSeconds === 0) return "00:00.00";
+  if (totalSeconds === 0) return "00:00.000";
   
-  const h = Math.floor(totalSeconds / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = totalSeconds % 60;
+  // Work in whole milliseconds so float noise (e.g. 59.9999999) never shows as "60.000".
+  const ms = toMs(totalSeconds);
+  const h = Math.floor(ms / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  const s = (ms % 60_000) / 1000;
   
   const mStr = m.toString().padStart(2, '0');
-  const sStr = s.toFixed(2).padStart(5, '0');
+  const sStr = s.toFixed(TIME_DECIMALS).padStart(3 + TIME_DECIMALS, '0');
   
   if (h > 0) {
     return `${h}:${mStr}:${sStr}`;

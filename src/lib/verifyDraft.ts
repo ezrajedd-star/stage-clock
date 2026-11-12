@@ -32,9 +32,9 @@ interface CarFacts {
   placeChanges: Set<number>;
 }
 
-const CLOCK = /(?<![\d:.])\+?(?:\d{1,2}:)?\d{1,2}:\d{2}\.\d{2}(?![\d])/g;
-const MIN_SEC = /(?<![\d:.])\+?(\d{1,2})\s?min\s?(\d{1,2}(?:\.\d{1,2})?)\s?(?:s|secs?|seconds?)\b/gi; // "1min 26.14sec"
-const SECONDS = /(?<![\d:.])\+?(\d{1,3}(?:\.\d{1,2})?)\s?(?:s|secs?|seconds?)\b/gi;
+const CLOCK = /(?<![\d:.])\+?(?:\d{1,2}:)?\d{1,2}:\d{2}\.\d{2,3}(?![\d])/g;
+const MIN_SEC = /(?<![\d:.])\+?(\d{1,2})\s?min\s?(\d{1,2}(?:\.\d{1,3})?)\s?(?:s|secs?|seconds?)\b/gi; // "1min 26.140sec"
+const SECONDS = /(?<![\d:.])\+?(\d{1,3}(?:\.\d{1,3})?)\s?(?:s|secs?|seconds?)\b/gi;
 const CAR = /#(\d{1,4})\b|\bcar\s+#?(\d{1,4})\b/gi;
 const ORDINAL = /\b(\d{1,2})(?:st|nd|rd|th)\b(?!\s+(?:stage|stages|ss|win|wins|time|times|consecutive|straight|career|round|event|rally|day|km|kilomet))/gi;
 const P_POS = /\bP(\d{1,2})\b/g;
@@ -43,11 +43,12 @@ const WORD_NUMBERS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 's
 const WORD_POS = new RegExp(`\\b(${WORD_NUMBERS.join('|')})(?=[\\s-]+(?:place|overall|position|in (?:the )?(?:class|group|standings|order)|on the stage|fastest|quickest|best)\\b)`, 'gi');
 const PLACES = /\b(\d{1,2})\s+(?:places?|positions?|spots?)\b/gi;
 
-const toCs = (seconds: number) => Math.round(seconds * 100);
+// Compared in whole milliseconds, so "0.42sec" and "0.420sec" are the same value.
+const toMs = (seconds: number) => Math.round(seconds * 1000);
 
 function collectFacts(sheet: FactSheet | RallySheet) {
   const cars = new Map<string, CarFacts>();
-  const timesCs = new Set<number>();
+  const timesMs = new Set<number>();
   const secondsValues = new Set<number>(); // penalties and the DNF penalty, in centiseconds
 
   const car = (n: string) => {
@@ -62,8 +63,8 @@ function collectFacts(sheet: FactSheet | RallySheet) {
   //   (position, previousPosition, from/to) and position changes for that car.
   const walk = (v: unknown) => {
     if (typeof v === 'string') {
-      const m = v.match(/^\+?((?:\d{1,2}:)?\d{1,2}:\d{2}\.\d{2}|\d{1,2}\.\d{2})$/);
-      if (m) timesCs.add(toCs(parseClock(m[1])));
+      const m = v.match(/^\+?((?:\d{1,2}:)?\d{1,2}:\d{2}\.\d{2,3}|\d{1,2}\.\d{2,3})$/);
+      if (m) timesMs.add(toMs(parseClock(m[1])));
     } else if (Array.isArray(v)) v.forEach(walk);
     else if (v && typeof v === 'object') {
       const o = v as Record<string, unknown>;
@@ -73,14 +74,14 @@ function collectFacts(sheet: FactSheet | RallySheet) {
         for (const k of ['position', 'previousPosition', 'from', 'to']) if (isNum(o[k])) c.positions.add(o[k] as number);
         if (isNum(o.positionChange)) c.placeChanges.add(Math.abs(o.positionChange));
         if (isNum(o.from) && isNum(o.to)) c.placeChanges.add(Math.abs(o.from - o.to));
-        if (isNum(o.penaltySeconds) && o.penaltySeconds > 0) secondsValues.add(toCs(o.penaltySeconds));
+        if (isNum(o.penaltySeconds) && o.penaltySeconds > 0) secondsValues.add(toMs(o.penaltySeconds));
       }
       Object.values(o).forEach(walk);
     }
   };
   walk(sheet);
   const dnfPenalty = sheet.dnfRule.match(/plus (\d+(?:\.\d+)?)s/);
-  if (dnfPenalty) secondsValues.add(toCs(Number(dnfPenalty[1])));
+  if (dnfPenalty) secondsValues.add(toMs(Number(dnfPenalty[1])));
 
   // Crew name -> cars, longest names first so "VM LOCSIN" wins over "VM".
   const crewToCars = new Map<string, Set<string>>();
@@ -91,7 +92,7 @@ function collectFacts(sheet: FactSheet | RallySheet) {
   }
   const crewNames = [...crewToCars.keys()].sort((a, b) => b.length - a.length);
 
-  return { cars, timesCs, secondsValues, crewToCars, crewNames };
+  return { cars, timesMs, secondsValues, crewToCars, crewNames };
 }
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -165,23 +166,23 @@ export function verifyDraft(draft: string, sheet: FactSheet | RallySheet): Verif
     const s = m.index!, e = s + m[0].length;
     masked.push([s, e]);
     checked++;
-    const cs = toCs(parseClock(m[0].replace('+', '')));
-    if (!facts.timesCs.has(cs)) add('time', s, e, `${m[0]} does not match any time or gap in the results.`);
+    const cs = toMs(parseClock(m[0].replace('+', '')));
+    if (!facts.timesMs.has(cs)) add('time', s, e, `${m[0]} does not match any time or gap in the results.`);
   }
   for (const m of draft.matchAll(MIN_SEC)) {
     const s = m.index!, e = s + m[0].length;
     if (masked.some(([a, b]) => s < b && e > a)) continue;
     masked.push([s, e]);
     checked++;
-    const cs = toCs(Number(m[1]) * 60 + Number(m[2]));
-    if (!facts.timesCs.has(cs)) add('time', s, e, `${m[0].trim()} does not match any time or gap in the results.`);
+    const cs = toMs(Number(m[1]) * 60 + Number(m[2]));
+    if (!facts.timesMs.has(cs)) add('time', s, e, `${m[0].trim()} does not match any time or gap in the results.`);
   }
   for (const m of draft.matchAll(SECONDS)) {
     const s = m.index!, e = s + m[0].length;
     if (masked.some(([a, b]) => s < b && e > a)) continue;
     checked++;
-    const cs = toCs(Number(m[1]));
-    if (!facts.timesCs.has(cs) && !facts.secondsValues.has(cs)) add('time', s, e, `${m[0].trim()} does not match any time, gap or penalty in the results.`);
+    const cs = toMs(Number(m[1]));
+    if (!facts.timesMs.has(cs) && !facts.secondsValues.has(cs)) add('time', s, e, `${m[0].trim()} does not match any time, gap or penalty in the results.`);
   }
 
   // Positions and place counts, checked against the cars named in the same sentence.
