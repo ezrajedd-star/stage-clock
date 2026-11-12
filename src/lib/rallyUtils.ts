@@ -54,11 +54,11 @@ export function formatPenalty(penaltySeconds: number): string {
   return `+${secondsToTime(penaltySeconds)}`;
 }
 
-export function calculateTotalTime(stageTimes: Record<string, number>, stagePenalties: Record<string, number>): number {
-  const times = Object.values(stageTimes);
-  
-  // Sum up all positive times (skip DNF/DNS values like -1, -2)
-  const timesSum = times.reduce((acc, t) => acc + (t > 0 ? t : 0), 0);
-  const penaltiesSum = Object.values(stagePenalties).reduce((acc, p) => acc + (p > 0 ? p : 0), 0);
+export function calculateTotalTime(stageTimes: Record<string, number>, stagePenalties: Record<string, number>, droppedStages: string[] = []): number {
+  const counted = (key: string) => !droppedStages.includes(key);
+
+  // Sum up all positive times (skip DNF/DNS values like -1, -2, and dropped runs)
+  const timesSum = Object.entries(stageTimes).reduce((acc, [k, t]) => acc + (t > 0 && counted(k) ? t : 0), 0);
+  const penaltiesSum = Object.entries(stagePenalties).reduce((acc, [k, p]) => acc + (p > 0 && counted(k) ? p : 0), 0);
   return timesSum + penaltiesSum;
 }

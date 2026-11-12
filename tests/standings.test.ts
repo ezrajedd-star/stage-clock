@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import drivers from './fixtures/drivers.firestore.json';
 import settingsDoc from './fixtures/settings.firestore.json';
 import { decodeDriver, decodeSettings } from '../src/lib/firestoreRest';
-import { computeResults, ALL_STAGES } from '../src/lib/standings';
+import { computeResults, ALL_STAGES, type ProcessedDriver } from '../src/lib/standings';
+import { calculateTotalTime } from '../src/lib/rallyUtils';
 import { originalCalc } from './reference/originalCalc';
 import type { Driver, Settings } from '../src/types';
 
@@ -11,6 +12,11 @@ const realSettings = decodeSettings(settingsDoc);
 
 // Without disqualified rows, the shared calculation must match the original board exactly.
 const officialDrivers = realDrivers.filter(d => !d.isHidden);
+// The original calculation had no dropped runs; with none dropped the rest must match exactly.
+const withoutDrops = (rows: ProcessedDriver[]) => rows.map(({ isDropped, ...rest }) => {
+  expect(isDropped).toEqual({});
+  return rest;
+});
 
 describe('results calculation moved to lib/standings', () => {
   it('matches the original board calculation exactly on real event data', () => {
@@ -19,12 +25,12 @@ describe('results calculation moved to lib/standings', () => {
     expect(after.classes).toEqual(before.classes);
     expect(after.classStats).toEqual(before.classStats);
     expect(after.overallStats).toEqual(before.overallStats);
-    expect(after.processed).toEqual(before.processedDrivers);
+    expect(withoutDrops(after.processed)).toEqual(before.processedDrivers);
   });
 
   it('also matches with overall DNF substitution and a different DNF penalty', () => {
     const s = { dnfPenalty: 60, dnfCalculationMethod: 'overall' as const };
-    expect(computeResults(officialDrivers, s).processed).toEqual(originalCalc(officialDrivers, s).processedDrivers);
+    expect(withoutDrops(computeResults(officialDrivers, s).processed)).toEqual(originalCalc(officialDrivers, s).processedDrivers);
   });
 
   it('fixture contains disqualified rows with times', () => {
@@ -51,6 +57,39 @@ describe('DNF/DNS substitute time uses official entries only', () => {
     const s = { dnfPenalty: 5, dnfCalculationMethod: 'class' as const };
     const withDsq = computeResults(realDrivers, s).processed.filter(d => !d.isHidden);
     expect(withDsq).toEqual(computeResults(officialDrivers, s).processed);
+  });
+});
+
+describe('dropped runs', () => {
+  const mk = (id: string, times: number[], dropped?: string[]): Driver => ({
+    id, name: id, carNumber: id, class: 'A', totalTimeSeconds: 0, updatedAt: null, droppedStages: dropped,
+    stageTimes: Object.fromEntries(times.map((t, i) => [String(i + 1), t])), stagePenalties: { '2': 10 },
+  });
+  const s: Settings = { dnfPenalty: 5, dnfCalculationMethod: 'class' };
+
+  it('leave the run (and its penalty) out of that crew\'s total but keep it on the stage', () => {
+    const [a] = computeResults([mk('1', [100, 200, 110], ['2']), mk('2', [101, 102, 103])], s, [1, 2, 3]).processed;
+    expect(a.effectiveTotal).toBe(210);
+    expect(a.effectiveStageTimes['2']).toBe(210);
+    expect(a.isDropped).toEqual({ '2': true });
+  });
+
+  it('do not change anyone else\'s times, including DNF substitutes', () => {
+    const field = [mk('1', [100, 200], ['2']), mk('2', [101, 102]), mk('3', [102, -1])];
+    const before = computeResults(field.map(d => ({ ...d, droppedStages: undefined })), s, [1, 2]).processed;
+    const after = computeResults(field, s, [1, 2]).processed;
+    expect(after.slice(1).map(d => d.effectiveTotal)).toEqual(before.slice(1).map(d => d.effectiveTotal));
+    expect(after[2].effectiveStageTimes['2']).toBe(215); // slowest in class 210 (incl. penalty) + 5
+  });
+
+  it('can drop a DNF/DNS so its substitute time is not added', () => {
+    const [, , c] = computeResults([mk('1', [100, 200]), mk('2', [101, 102]), mk('3', [102, -1], ['2'])], s, [1, 2]).processed;
+    expect(c.effectiveTotal).toBe(102);
+  });
+
+  it('are left out of the stored total too', () => {
+    expect(calculateTotalTime({ '1': 100, '2': 200 }, { '2': 10 }, ['2'])).toBe(100);
+    expect(calculateTotalTime({ '1': 100, '2': 200 }, { '2': 10 })).toBe(310);
   });
 });
 

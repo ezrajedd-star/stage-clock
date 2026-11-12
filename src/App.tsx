@@ -157,6 +157,32 @@ export default function App() {
     setError(null);
   };
 
+  // Drops (or restores) one stage run of an entry: a dropped run stays on the board but
+  // does not count towards that crew's total.
+  const handleToggleDropRun = async (driverId: string, stageKey: string, drop: boolean) => {
+    if (!user) return;
+    const driver = drivers.find(d => d.id === driverId);
+    if (!driver) return;
+    setProcessing(true);
+    setError(null);
+    try {
+      const current = driver.droppedStages ?? [];
+      const droppedStages = drop
+        ? Array.from(new Set([...current, stageKey])).sort((a, b) => Number(a) - Number(b))
+        : current.filter(k => k !== stageKey);
+      await setDoc(doc(db, 'drivers', driverId), {
+        droppedStages,
+        totalTimeSeconds: calculateTotalTime(driver.stageTimes, driver.stagePenalties, droppedStages),
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+    } catch (err: any) {
+      setError(err.message);
+      handleFirestoreError(err, OperationType.WRITE, `drivers/${driverId}`);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const handleDeleteDriver = async (driverId: string) => {
     if (!user) return;
     setProcessing(true);
@@ -211,7 +237,8 @@ export default function App() {
         const data = existingDoc.data() as Driver;
         const newStageTimes = { ...data.stageTimes, [ssIndex]: timeSec };
         const newStagePenalties = { ...data.stagePenalties, [ssIndex]: penaltySec };
-        const newTotal = calculateTotalTime(newStageTimes, newStagePenalties);
+        const droppedStages = data.droppedStages ?? [];
+        const newTotal = calculateTotalTime(newStageTimes, newStagePenalties, droppedStages);
         
         driverData = {
           name: driverName,
@@ -220,6 +247,7 @@ export default function App() {
           class: data.class,
           stageTimes: newStageTimes,
           stagePenalties: newStagePenalties,
+          droppedStages,
           totalTimeSeconds: newTotal,
           isHidden: data.isHidden || false,
           updatedAt: serverTimestamp()
@@ -367,6 +395,7 @@ export default function App() {
               <InputConsole 
                 onUpdate={handleUpdate} 
                 onUpdateCarModel={handleUpdateCarModel}
+                onToggleDropRun={handleToggleDropRun}
                 isLoading={processing} 
                 drivers={drivers}
                 settings={settings}

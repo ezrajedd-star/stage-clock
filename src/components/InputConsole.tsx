@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
-import { Send, UserPlus, Hash, Layers, PlayCircle, ShieldAlert, Car, Save } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Send, UserPlus, Hash, Layers, PlayCircle, ShieldAlert, Car, Save, Ban, Undo2 } from 'lucide-react';
+import { secondsToTime } from '../lib/rallyUtils';
 import { Driver, Settings } from '../types';
 
 interface InputConsoleProps {
@@ -18,17 +19,22 @@ interface InputConsoleProps {
     penaltySec: number;
   }) => void;
   onUpdateCarModel: (driverId: string, carModel: string) => void;
+  onToggleDropRun: (driverId: string, stageKey: string, drop: boolean) => void;
   isLoading: boolean;
   drivers: Driver[];
   settings: Settings;
   onUpdateSettings: (s: Partial<Settings>) => void;
 }
 
-export default function InputConsole({ onUpdate, onUpdateCarModel, isLoading, drivers, settings, onUpdateSettings }: InputConsoleProps) {
+const norm = (v: string) => v.trim().toUpperCase();
+
+export default function InputConsole({ onUpdate, onUpdateCarModel, onToggleDropRun, isLoading, drivers, settings, onUpdateSettings }: InputConsoleProps) {
   const [driverName, setDriverName] = useState("");
   const [carNumber, setCarNumber] = useState("");
   const [carClass, setCarClass] = useState("");
   const [carModel, setCarModel] = useState("");
+  // True once the operator types in the Car field: suggestions never overwrite their input.
+  const [carTouched, setCarTouched] = useState(false);
   const [ssNum, setSsNum] = useState("1");
   const [recordedTime, setRecordedTime] = useState("");
   const [penaltySec, setPenaltySec] = useState(0);
@@ -50,8 +56,9 @@ export default function InputConsole({ onUpdate, onUpdateCarModel, isLoading, dr
     // We extract the number part.
     const number = value.includes(" - ") ? value.split(" - ")[0] : value;
     setCarNumber(number);
+    setCarTouched(false);
     
-    const existing = drivers.find(d => d.carNumber === number);
+    const existing = drivers.find(d => norm(d.carNumber) === norm(number));
     if (existing) {
       setDriverName(existing.name);
       setCarClass(existing.class);
@@ -62,9 +69,39 @@ export default function InputConsole({ onUpdate, onUpdateCarModel, isLoading, dr
   };
 
   // The entry this form points at (same car number and class), if it already exists.
-  const currentEntry = drivers.find(d =>
-    d.carNumber === carNumber.trim().toUpperCase() && d.class.trim().toUpperCase() === carClass.trim().toUpperCase()
-  );
+  const currentEntry = drivers.find(d => norm(d.carNumber) === norm(carNumber) && norm(d.class) === norm(carClass));
+
+  // Once car #, class and driver name are filled in, suggest the car from an existing row:
+  // the same entry first, then the same car number and driver in another class, then the same driver.
+  const suggestion = useMemo(() => {
+    const name = norm(driverName);
+    if (!norm(carNumber) || !norm(carClass) || !name) return null;
+    const withCar = drivers.filter(d => d.carModel?.trim());
+    const found =
+      withCar.find(d => norm(d.carNumber) === norm(carNumber) && norm(d.class) === norm(carClass)) ??
+      withCar.find(d => norm(d.carNumber) === norm(carNumber) && norm(d.name) === name) ??
+      withCar.find(d => norm(d.name) === name);
+    return found ? { car: found.carModel!.trim(), from: found } : null;
+  }, [drivers, carNumber, carClass, driverName]);
+
+  const lastSuggested = useRef<string | null>(null);
+  useEffect(() => {
+    if (carTouched) return;
+    if (suggestion) {
+      setCarModel(suggestion.car);
+      lastSuggested.current = suggestion.car;
+    } else if (lastSuggested.current !== null) {
+      // The details no longer match that row: take the suggestion back out.
+      const previous = lastSuggested.current;
+      setCarModel(c => (c === previous ? "" : c));
+      lastSuggested.current = null;
+    }
+  }, [suggestion, carTouched]);
+  const showSuggestion = !!suggestion && !carTouched && carModel === suggestion.car;
+
+  // Drop run: only for an existing entry that has a result on the selected stage.
+  const stageResult = currentEntry?.stageTimes?.[ssNum];
+  const stageDropped = !!currentEntry?.droppedStages?.includes(ssNum);
   const carModelChanged = !!currentEntry && carModel.trim() !== (currentEntry.carModel ?? "");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -151,7 +188,7 @@ export default function InputConsole({ onUpdate, onUpdateCarModel, isLoading, dr
             <input
               type="text"
               value={carModel}
-              onChange={(e) => setCarModel(e.target.value)}
+              onChange={(e) => { setCarModel(e.target.value); setCarTouched(true); }}
               maxLength={60}
               className="flex-1 min-w-0 bg-(--bg-deep) border border-(--line) text-white px-2 py-1.5 focus:border-(--accent) focus:outline-none font-bold text-xs"
               placeholder="e.g. AWD Turbo Corolla"
@@ -168,6 +205,11 @@ export default function InputConsole({ onUpdate, onUpdateCarModel, isLoading, dr
               </button>
             )}
           </div>
+          {showSuggestion && (
+            <p className="text-[8px] text-(--text-subtle) uppercase font-bold tracking-wider">
+              Suggested from #{suggestion!.from.carNumber} {suggestion!.from.name} ({suggestion!.from.class}) · type to change
+            </p>
+          )}
         </div>
 
         <div className="h-px bg-(--line)/10" />
@@ -200,6 +242,25 @@ export default function InputConsole({ onUpdate, onUpdateCarModel, isLoading, dr
             <label htmlFor="dnf-dns-mode" className="cursor-pointer">DNF/DNS</label>
           </div>
         </div>
+
+        {/* Drop run: the selected stage of an existing entry */}
+        {currentEntry && stageResult !== undefined && (
+          <div className={`flex items-center justify-between gap-2 px-2 py-1.5 border ${stageDropped ? 'border-amber-500/40 bg-amber-500/5' : 'border-(--line)'}`}>
+            <span className="text-[9px] uppercase font-bold text-(--text-secondary) leading-tight">
+              SS{ssNum} run: <span className={stageDropped ? 'line-through text-(--text-subtle)' : 'text-white'}>{secondsToTime(stageResult)}</span>
+              {stageDropped && <span className="text-amber-400"> · dropped, not in total</span>}
+            </span>
+            <button
+              type="button"
+              disabled={isLoading}
+              onClick={() => onToggleDropRun(currentEntry.id, ssNum, !stageDropped)}
+              className={`shrink-0 flex items-center gap-1 px-2 py-1 border uppercase font-black text-[8px] tracking-wider transition-colors disabled:opacity-50 ${stageDropped ? 'border-white/40 text-white hover:bg-white hover:text-black' : 'border-amber-500 text-amber-400 hover:bg-amber-500 hover:text-black'}`}
+              title={stageDropped ? 'Count this run in the total again' : 'Leave this run out of the total (it stays on the board)'}
+            >
+              {stageDropped ? <><Undo2 size={10} /> Restore run</> : <><Ban size={10} /> Drop run</>}
+            </button>
+          </div>
+        )}
 
         {/* Conditional Sections based on DNF/DNS toggle */}
         {!isDnfDns ? (

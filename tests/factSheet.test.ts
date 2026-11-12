@@ -253,3 +253,15 @@ describe('fact sheet: event-wide stories and headlines', () => {
     expect(sheet.headlines.length).toBeLessThanOrEqual(8);
   });
 });
+
+describe('fact sheet: dropped runs', () => {
+  it('marks a dropped run on the stage and lists it in the standings', () => {
+    const field = [
+      { ...mk('1', 'ALPHA', 'A', [100, 150]), droppedStages: ['2'] },
+      mk('2', 'BRAVO', 'A', [101, 105]),
+    ];
+    const a = cls(buildFactSheet(field, settings, 2), 'A');
+    expect(a.stageResults.find(r => r.car === '1')).toMatchObject({ dropped: true, position: 2 });
+    expect(a.standings.map(s => [s.car, s.totalTime, s.droppedRuns])).toEqual([['1', '01:40.00', ['SS2']], ['2', '03:26.00', []]]);
+  });
+});

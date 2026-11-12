@@ -11,6 +11,7 @@ export interface Driver {
   class: string;
   stageTimes: Record<string, number>; // SS# -> seconds
   stagePenalties: Record<string, number>; // SS# -> seconds
+  droppedStages?: string[]; // SS# of runs dropped by the operator: shown, but not counted in the total
   totalTimeSeconds: number;
   isHidden?: boolean;
   updatedAt: any; // Firestore Timestamp or request.time

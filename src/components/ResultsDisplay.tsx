@@ -53,6 +53,22 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
   const showOps = viewMode === 'stages' && !!(onToggleHidden || onDeleteDriver);
   // In stage view, POS / # / DRIVER stay pinned while stage columns scroll sideways.
   const pin = viewMode === 'stages';
+  // Fixed column widths, shared by headers and cells, so every class table lines up. In stage
+  // view a filler column takes the spare room; on the leaderboard only DRIVER flexes.
+  const W = pin
+    ? {
+        pos: 'w-10 min-w-10 max-w-10', num: 'w-12 min-w-12 max-w-12', driver: 'w-28 min-w-28 max-w-28',
+        car: 'w-40 min-w-40 max-w-40', total: 'w-24 min-w-24 max-w-24', diff: 'w-24 min-w-24 max-w-24',
+      }
+    : {
+        pos: 'w-9 min-w-9 max-w-9 sm:w-10 sm:min-w-10 sm:max-w-10',
+        num: 'w-10 min-w-10 max-w-10 sm:w-12 sm:min-w-12 sm:max-w-12',
+        driver: 'w-full max-w-0', // takes the remaining width; long names truncate
+        car: 'w-[76px] min-w-[76px] max-w-[76px] sm:w-28 sm:min-w-28 sm:max-w-28',
+        total: 'w-[68px] min-w-[68px] max-w-[68px] sm:w-20 sm:min-w-20 sm:max-w-20',
+        diff: 'w-[68px] min-w-[68px] max-w-[68px] sm:w-20 sm:min-w-20 sm:max-w-20',
+      };
+  const SS_W = 'w-[72px] min-w-[72px] max-w-[72px]';
 
   const classes = useMemo(() => getClasses(drivers), [drivers]);
 
@@ -89,7 +105,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
             display = `${type} (${display})`;
           }
           
-          return `${display}${penalty ? ` (+${penalty}s)` : ''}`.replace(/:/g, '.');
+          return `${display}${penalty ? ` (+${penalty}s)` : ''}${d.isDropped[s.toString()] ? ' (dropped)' : ''}`.replace(/:/g, '.');
         }),
         secondsToTime(d.effectiveTotal)
       ]);
@@ -172,7 +188,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
       </div>
 
       <div className={`flex-1 overflow-auto custom-scrollbar ${viewMode === 'leaderboard' ? 'p-2 bg-(--bg-darker)' : ''}`}>
-        <div className={isOverall ? 'grid grid-cols-1 max-w-3xl mx-auto gap-2 h-max' : viewMode === 'leaderboard' ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 h-max' : ''}>
+        <div className={isOverall ? 'grid grid-cols-1 max-w-3xl mx-auto gap-2 h-max' : viewMode === 'leaderboard' ? 'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-2 h-max' : ''}>
           {(isOverall ? ['OVERALL'] : classes).map(className => {
             const classDrivers = processedDrivers
               .filter(d => (isOverall || d.class.trim().toUpperCase() === className) && (showHidden || !d.isHidden))
@@ -193,20 +209,21 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                   <thead className="text-(--text-secondary) bg-(--bg-deep)/50">
                     <tr className="border-b border-(--line)/10">
                       {showOps && (
-                        <th className="px-2 py-1.5 font-black uppercase tracking-widest text-[8px] w-16 text-center">OPS</th>
+                        <th className="px-2 py-1.5 font-black uppercase tracking-widest text-[8px] w-16 min-w-16 max-w-16 text-center">OPS</th>
                       )}
-                      <th className={`px-1 sm:px-2 py-1.5 font-black uppercase tracking-widest text-center text-(--text-secondary) ${pin ? 'sticky left-0 z-[2] bg-(--bg-panel) w-10 min-w-10 max-w-10' : 'w-10 sm:w-12'}`}>POS</th>
-                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${pin ? 'sticky left-10 z-[2] bg-(--bg-panel) w-12 min-w-12 max-w-12' : 'w-10 sm:w-12'}`}>#</th>
-                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${pin ? 'sticky left-22 z-[2] bg-(--bg-panel) w-28 min-w-28 max-w-28 border-r border-(--line)/30' : ''}`}>DRIVER</th>
-                      <th className="px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest">CAR</th>
+                      <th className={`px-1 sm:px-2 py-1.5 font-black uppercase tracking-widest text-center text-(--text-secondary) ${W.pos} ${pin ? 'sticky left-0 z-[2] bg-(--bg-panel)' : ''}`}>POS</th>
+                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${W.num} ${pin ? 'sticky left-10 z-[2] bg-(--bg-panel)' : ''}`}>#</th>
+                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${W.driver} ${pin ? 'sticky left-22 z-[2] bg-(--bg-panel) border-r border-(--line)/30' : ''}`}>DRIVER</th>
+                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest ${W.car}`}>CAR</th>
                       {viewMode === 'leaderboard' && (
-                        <th className="hidden sm:table-cell px-3 py-1.5 font-black uppercase tracking-widest text-center w-16">STAGES</th>
+                        <th className="hidden sm:table-cell px-3 py-1.5 font-black uppercase tracking-widest text-center w-16 min-w-16 max-w-16">STAGES</th>
                       )}
-                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--accent) ${viewMode === 'leaderboard' ? 'w-20' : 'w-24'}`}>TOTAL</th>
-                      <th className={`px-2 sm:px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--text-secondary) border-(--line)/20 ${viewMode === 'leaderboard' ? 'w-20' : 'w-24 border-r'}`}>DIFF</th>
+                      <th className={`px-1.5 sm:px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--accent) ${W.total}`}>TOTAL</th>
+                      <th className={`px-1.5 sm:px-3 py-1.5 font-black uppercase tracking-widest text-right text-(--text-secondary) border-(--line)/20 ${W.diff} ${pin ? 'border-r' : ''}`}>DIFF</th>
                       {viewMode === 'stages' && visibleStages.map(s => (
-                        <th key={s} className="px-1 py-1.5 font-black uppercase tracking-widest text-center border-r border-(--line)/10 shrink-0 min-w-[55px]">SS{s}</th>
+                        <th key={s} className={`px-1 py-1.5 font-black uppercase tracking-widest text-center border-r border-(--line)/10 ${SS_W}`}>SS{s}</th>
                       ))}
+                      {pin && <th aria-hidden="true" className="w-full p-0" />}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-(--bg-darker)">
@@ -233,7 +250,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                             className={`${d.isHidden ? 'opacity-40 grayscale bg-red-950/10' : ''} hover:bg-(--accent)/5 group transition-colors odd:bg-(--bg-panel) even:bg-(--bg-deep)`}
                           >
                             {showOps && (
-                              <td className="px-2 py-0.5 whitespace-nowrap text-center">
+                              <td className="px-2 py-0.5 whitespace-nowrap text-center w-16 min-w-16 max-w-16">
                                 <div className="flex items-center justify-center gap-1.5">
                                   {onToggleHidden && (
                                     <button 
@@ -256,13 +273,13 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                                 </div>
                               </td>
                             )}
-                            <td className={`px-1 sm:px-2 py-0.5 text-center font-bold text-[10px] tabular-nums ${getPositionStyle(index + 1)} ${pin ? 'sticky left-0 z-[1] bg-inherit w-10 min-w-10 max-w-10' : ''}`}>
+                            <td className={`px-1 sm:px-2 py-0.5 text-center font-bold text-[10px] tabular-nums ${getPositionStyle(index + 1)} ${W.pos} ${pin ? 'sticky left-0 z-[1] bg-inherit' : ''}`}>
                               {getOrdinal(index + 1)}
                             </td>
-                            <td className={`px-2 sm:px-3 py-0.5 font-black text-(--accent) italic ${viewMode === 'leaderboard' ? 'text-sm' : 'text-base'} ${pin ? 'sticky left-10 z-[1] bg-inherit w-12 min-w-12 max-w-12' : ''}`}>
+                            <td className={`px-2 sm:px-3 py-0.5 font-black text-(--accent) italic ${viewMode === 'leaderboard' ? 'text-sm' : 'text-base'} ${W.num} ${pin ? 'sticky left-10 z-[1] bg-inherit' : ''}`}>
                               {d.carNumber}
                             </td>
-                            <td className={`px-2 sm:px-3 py-0.5 min-w-0 ${pin ? 'sticky left-22 z-[1] bg-inherit w-28 min-w-28 max-w-28 border-r border-(--line)/30' : ''}`}>
+                            <td className={`px-2 sm:px-3 py-0.5 min-w-0 ${W.driver} ${pin ? 'sticky left-22 z-[1] bg-inherit border-r border-(--line)/30' : ''}`}>
                               <div className="font-black text-white uppercase text-[10px] leading-tight tabular-nums truncate max-w-[100px]" title={d.name}>{d.name}</div>
                               {isOverall && (
                                 <div className="text-[8px] font-bold uppercase tracking-wider text-(--text-secondary) leading-tight">{d.class}</div>
@@ -274,28 +291,33 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                                   ))}
                                 </div>
                               )}
+                              {viewMode === 'leaderboard' && Object.keys(d.isDropped).length > 0 && (
+                                <div className="text-[7px] font-bold uppercase tracking-wider text-amber-400/80 leading-tight mt-0.5">
+                                  Dropped {Object.keys(d.isDropped).map(k => `SS${k}`).join(', ')}
+                                </div>
+                              )}
                             </td>
-                            <td className="px-2 sm:px-3 py-0.5">
+                            <td className={`px-2 sm:px-3 py-0.5 ${W.car}`}>
                               <div
-                                className={`text-[9px] font-bold leading-tight ${d.carModel ? 'text-white/70' : 'text-(--text-subtle)'} ${viewMode === 'leaderboard' ? 'break-words max-w-[96px] sm:max-w-[160px]' : 'whitespace-nowrap'}`}
+                                className={`text-[9px] font-bold leading-tight ${d.carModel ? 'text-white/70' : 'text-(--text-subtle)'} ${pin ? 'truncate' : 'break-words'}`}
                                 title={d.carModel}
                               >
                                 {d.carModel || '—'}
                               </div>
                             </td>
                             {viewMode === 'leaderboard' && (
-                              <td className="hidden sm:table-cell px-3 py-0.5 text-center">
+                              <td className="hidden sm:table-cell px-3 py-0.5 text-center w-16 min-w-16 max-w-16">
                                 <div className="text-[10px] font-bold text-white/70">
                                   {Object.values(d.stageTimes).filter(v => v !== undefined).length}
                                 </div>
                               </td>
                             )}
-                            <td className="px-2 sm:px-3 py-0.5 text-right whitespace-nowrap">
+                            <td className={`px-1.5 sm:px-3 py-0.5 text-right whitespace-nowrap ${W.total}`}>
                               <div className={`font-black ${viewMode === 'leaderboard' ? 'text-[11px]' : 'text-[12px]'} ${dnfDnsCount > 0 ? 'text-red-400' : 'text-(--accent)'}`}>
                                 {secondsToTime(d.effectiveTotal)}
                               </div>
                             </td>
-                            <td className={`px-2 sm:px-3 py-0.5 text-right whitespace-nowrap border-(--line)/20 ${viewMode === 'stages' ? 'border-r' : ''}`}>
+                            <td className={`px-1.5 sm:px-3 py-0.5 text-right whitespace-nowrap border-(--line)/20 ${W.diff} ${pin ? 'border-r' : ''}`}>
                               <div className={`text-[9px] font-bold ${isLeader ? 'text-(--accent-ready)' : 'text-(--text-secondary)'}`}>
                                 {diff}
                               </div>
@@ -305,6 +327,7 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                               const time = d.stageTimes[stageKey];
                               const effectiveTime = d.effectiveStageTimes[stageKey];
                               const isDnf = d.isDnfEntry[stageKey];
+                              const isDropped = !!d.isDropped[stageKey];
                               const penalty = d.stagePenalties[stageKey] || 0;
                               const inclusiveTime = time > 0 ? time + penalty : 0;
                               
@@ -326,14 +349,16 @@ export function MasterEntryList({ drivers, settings, onToggleHidden, onDeleteDri
                               }
 
                               return (
-                                <td key={s} className="px-1 py-0.5 text-center border-r border-(--line)/10 tabular-nums">
-                                  <div className={`font-bold text-[10px] ${time !== undefined ? colorClass : 'text-(--text-subtle)'}`}>
+                                <td key={s} className={`px-1 py-0.5 text-center border-r border-(--line)/10 tabular-nums ${SS_W}`} title={isDropped ? 'Dropped run: not counted in the total' : undefined}>
+                                  <div className={`font-bold text-[10px] ${time === undefined ? 'text-(--text-subtle)' : isDropped ? 'text-(--text-subtle) line-through' : colorClass}`}>
                                     {timeDisplay}
                                   </div>
-                                  {penalty > 0 && <span className="text-red-500 font-black text-[7px] block leading-none mt-0.5">+{penalty}</span>}
+                                  {isDropped && <span className="text-amber-400 font-black text-[7px] block leading-none mt-0.5 uppercase tracking-wider">Dropped</span>}
+                                  {penalty > 0 && <span className={`${isDropped ? 'text-(--text-subtle) line-through' : 'text-red-500'} font-black text-[7px] block leading-none mt-0.5`}>+{penalty}</span>}
                                 </td>
                               );
                             })}
+                            {pin && <td aria-hidden="true" className="w-full p-0" />}
                           </motion.tr>
                         );
                       })}

@@ -54,6 +54,7 @@ export function decodeDriver(doc: RestDocument): Driver {
     stagePenalties: (data.stagePenalties as Record<string, number>) ?? {},
     totalTimeSeconds: Number(data.totalTimeSeconds ?? 0),
     isHidden: Boolean(data.isHidden),
+    ...(Array.isArray(data.droppedStages) && data.droppedStages.length ? { droppedStages: (data.droppedStages as unknown[]).map(String) } : {}),
     updatedAt: data.updatedAt ?? null,
   };
 }

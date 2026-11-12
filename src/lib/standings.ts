@@ -18,6 +18,7 @@ export interface ProcessedDriver extends Driver {
   effectiveTotal: number;
   effectiveStageTimes: Record<string, number>;
   isDnfEntry: Record<string, boolean>;
+  isDropped: Record<string, boolean>; // run dropped by the operator: not counted in effectiveTotal
 }
 
 export const classKey = (d: Driver) => d.class.trim().toUpperCase();
@@ -74,6 +75,8 @@ export function computeOverallStats(drivers: Driver[], stages: number[]) {
 }
 
 // Effective stage times: valid time + penalty; DNF/DNS = slowest (class or overall) + DNF penalty.
+// A dropped run keeps its effective time (still shown, still part of the stage) but is left out
+// of that crew's total.
 export function computeProcessedDrivers(
   drivers: Driver[],
   settings: Settings,
@@ -86,6 +89,8 @@ export function computeProcessedDrivers(
     let effectiveTotal = 0;
     const effectiveStageTimes: Record<string, number> = {};
     const isDnfEntry: Record<string, boolean> = {};
+    const isDropped: Record<string, boolean> = {};
+    const dropped = new Set(d.droppedStages ?? []);
 
     stages.forEach(s => {
       const stageKey = s.toString();
@@ -106,7 +111,9 @@ export function computeProcessedDrivers(
       }
 
       effectiveStageTimes[stageKey] = effectiveTime;
-      if (effectiveTime > 0) {
+      if (dropped.has(stageKey) && time !== undefined) {
+        isDropped[stageKey] = true;
+      } else if (effectiveTime > 0) {
         effectiveTotal += effectiveTime;
       }
     });
@@ -115,7 +122,8 @@ export function computeProcessedDrivers(
       ...d,
       effectiveTotal,
       effectiveStageTimes,
-      isDnfEntry
+      isDnfEntry,
+      isDropped
     };
   });
 }

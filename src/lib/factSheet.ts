@@ -24,6 +24,7 @@ export interface StageResultEntry {
   penaltySeconds: number;
   gapToStageWinner: string | null; // e.g. "+00:01.23"; "+00:00.00" for the winner
   classifiedTime: string | null;   // DNF/DNS only: substituted time counted in the total
+  dropped: boolean;            // the operator dropped this run: it stands on the stage but not in the crew's total
 }
 
 export interface StandingEntry {
@@ -38,6 +39,7 @@ export interface StandingEntry {
   positionChange: number | null;   // + = places gained, - = places lost
   stagesWithResult: number;
   dnfDnsCount: number;
+  droppedRuns: string[];       // e.g. ["SS3"]: runs left out of this crew's total
 }
 
 export type Storyline =
@@ -136,6 +138,7 @@ function stageResultsFor(group: ProcessedDriver[], stage: number): StageResultEn
     penaltySeconds: d.stagePenalties[key] || 0,
     gapToStageWinner: fmtGap(d.effectiveStageTimes[key] - winnerSeconds),
     classifiedTime: null,
+    dropped: !!d.isDropped[key],
   }));
 
   const notTimed: StageResultEntry[] = group
@@ -152,6 +155,7 @@ function stageResultsFor(group: ProcessedDriver[], stage: number): StageResultEn
       penaltySeconds: d.stagePenalties[key] || 0,
       gapToStageWinner: null,
       classifiedTime: d.effectiveStageTimes[key] > 0 ? fmtStage(d.effectiveStageTimes[key]) : null,
+      dropped: !!d.isDropped[key],
     }));
 
   return [...timed, ...notTimed];
@@ -177,6 +181,7 @@ function standingsFor(group: ProcessedDriver[], stage: number, previous: Map<str
       positionChange: prev === null ? null : prev - position,
       stagesWithResult: stageKeys.length,
       dnfDnsCount: stageKeys.filter(k => d.stageTimes[k] < 0).length,
+      droppedRuns: Object.keys(d.isDropped).filter(k => Number(k) <= stage).map(k => `SS${k}`),
     };
   });
 }
