@@ -268,15 +268,16 @@ export default function InputConsole({ onUpdate, onUpdateCarModel, onToggleDropR
             {/* Row 4: Time/Status Input (Valid Run) */}
             <div className="space-y-1">
               <label className="text-(--accent) flex items-center gap-1.5 uppercase font-black text-[8px] tracking-wider transition-colors">
-                Time (MM:SS.SS)
+                Time (MM:SS.sss)
               </label>
               <input
                 type="text"
                 value={recordedTime}
                 onChange={(e) => setRecordedTime(e.target.value)}
                 className="w-full bg-(--bg-deep) border border-(--line) text-(--accent) px-2 py-2 focus:border-white focus:outline-none font-black text-lg tracking-tight tabular-nums"
-                placeholder="00:00.00"
-                pattern="^(\d+:)?\d{2}:\d{2}(\.\d+)?$"
+                placeholder="00:00.000"
+                pattern="^(\d+:)?\d{2}:\d{2}(\.\d{1,3})?$"
+                title="MM:SS.sss, e.g. 02:05.425 (up to 3 decimals)"
                 required
               />
             </div>

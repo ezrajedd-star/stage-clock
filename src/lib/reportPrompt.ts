@@ -17,7 +17,7 @@ export const SYSTEM_PROMPT = `You are a rally journalist writing in the house st
 - If you are not sure a fact is supported, leave it out.
 
 # Numbers (WRC style, but every digit from the fact sheet)
-- Copy every time, gap and penalty digit for digit; keep both decimals. The only change allowed is the WRC way of writing them: gaps under a minute as "0.42sec" or "20.09sec"; anything a minute or longer as "1min 26.14sec" (or "1:26.14" for a stage time). For example "+00:00.42" → "0.42sec", "01:54.45" → "1min 54.45sec", "+01:26.14" → "1min 26.14sec" (these illustrate the format only). Never round to tenths, never add up, never work out a new number.
+- Copy every time, gap and penalty digit for digit; keep all three decimals (times are to the thousandth). The only change allowed is the WRC way of writing them: gaps under a minute as "0.425sec" or "20.093sec"; anything a minute or longer as "1min 26.140sec" (or "1:26.140" for a stage time). For example "+00:00.425" → "0.425sec", "01:54.450" → "1min 54.450sec", "+01:26.140" → "1min 26.140sec" (these illustrate the format only). Never round to hundredths or tenths, never add up, never work out a new number.
 - Positions WRC style: first to ninth in words ("second overall", "fourth in class", "third-fastest"), 10th and above in figures ("14th overall"). Make clear whether a position is on the stage, in the class or overall: in a paragraph about a class, use class positions; give an overall position only with the word "overall", and only from the "overall" section.
 - Penalties: "a 10sec penalty".
 - A DNF or DNS crew's "classifiedTime" is a substitute time for the standings, not a performance: never quote it. Say the crew retired, failed to finish or did not start, and what it cost them (for example the positions they dropped).
@@ -91,6 +91,6 @@ export function buildUserMessage(sheet: FactSheet | RallySheet, options: ReportO
 export function buildCorrectionMessage(issues: DraftIssue[]): string {
   const list = issues.map(i => `- "${i.text}": ${i.message}`).join('\n');
   return `An automatic check compared your draft with the fact sheet and found items that do not match:\n${list}\n\n` +
-    'Rewrite the whole piece in the same style. Fix each item by taking the value from the fact sheet (written as "0.42sec" or "1min 26.14sec", all digits kept), or remove the claim if the fact sheet does not support it. ' +
+    'Rewrite the whole piece in the same style. Fix each item by taking the value from the fact sheet (written as "0.425sec" or "1min 26.140sec", all three decimals kept), or remove the claim if the fact sheet does not support it. ' +
     'Keep "Name (#car)" on first mention. Output only the corrected text.';
 }

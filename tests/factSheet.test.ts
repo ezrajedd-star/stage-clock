@@ -30,17 +30,17 @@ describe('fact sheet: normal stage', () => {
 
   it('ranks the stage with board-formatted times and gaps', () => {
     expect(a.stageResults.map(r => [r.position, r.car, r.stageTime, r.gapToStageWinner])).toEqual([
-      [1, '2', '01:45.00', '+00:00.00'],
-      [2, '1', '01:50.00', '+00:05.00'],
-      [3, '3', '02:00.00', '+00:15.00'],
+      [1, '2', '01:45.000', '+00:00.000'],
+      [2, '1', '01:50.000', '+00:05.000'],
+      [3, '3', '02:00.000', '+00:15.000'],
     ]);
   });
 
   it('gives cumulative standings with gaps and position changes', () => {
     expect(a.standings.map(s => [s.position, s.car, s.totalTime, s.gapToLeader, s.previousPosition, s.positionChange])).toEqual([
-      [1, '2', '03:26.00', '+00:00.00', 2, 1],
-      [2, '1', '03:30.00', '+00:04.00', 1, -1],
-      [3, '3', '03:42.00', '+00:16.00', 3, 0],
+      [1, '2', '03:26.000', '+00:00.000', 2, 1],
+      [2, '1', '03:30.000', '+00:04.000', 1, -1],
+      [3, '3', '03:42.000', '+00:16.000', 3, 0],
     ]);
   });
 
@@ -51,7 +51,7 @@ describe('fact sheet: normal stage', () => {
   });
 
   it('detects the stage winner and first stage win', () => {
-    expect(a.storylines).toContainEqual({ type: 'stage_winner', cars: ['2'], crews: ['BRAVO'], time: '01:45.00', tied: false, marginToNext: '+00:05.00', stageWinsThisEvent: [1] });
+    expect(a.storylines).toContainEqual({ type: 'stage_winner', cars: ['2'], crews: ['BRAVO'], time: '01:45.000', tied: false, marginToNext: '+00:05.000', stageWinsThisEvent: [1] });
     expect(a.storylines).toContainEqual({ type: 'first_stage_win', car: '2', crew: 'BRAVO' });
   });
 });
@@ -69,7 +69,7 @@ describe('fact sheet: lead change', () => {
       type: 'lead_change',
       newLeader: { car: '2', crew: 'BRAVO' },
       previousLeader: { car: '1', crew: 'ALPHA' },
-      gapToSecond: '+00:04.00',
+      gapToSecond: '+00:04.000',
     });
   });
 
@@ -80,7 +80,7 @@ describe('fact sheet: lead change', () => {
 
   it('reports a leader extending the lead when there is no change', () => {
     const ext = cls(buildFactSheet([mk('1', 'ALPHA', 'A', [100, 100]), mk('2', 'BRAVO', 'A', [101, 103])], settings, 2), 'A');
-    expect(ext.storylines).toContainEqual({ type: 'lead_extended', leader: { car: '1', crew: 'ALPHA' }, second: { car: '2', crew: 'BRAVO' }, previousGapToSecond: '+00:01.00', gapToSecond: '+00:04.00', change: '+00:03.00', rivalRetiredThisStage: false });
+    expect(ext.storylines).toContainEqual({ type: 'lead_extended', leader: { car: '1', crew: 'ALPHA' }, second: { car: '2', crew: 'BRAVO' }, previousGapToSecond: '+00:01.000', gapToSecond: '+00:04.000', change: '+00:03.000', rivalRetiredThisStage: false });
   });
 
   it('flags a lead that grew because the rival retired on the stage', () => {
@@ -103,7 +103,7 @@ describe('fact sheet: ties', () => {
   });
 
   it('marks a shared stage win and a shared lead', () => {
-    expect(a.storylines).toContainEqual({ type: 'stage_winner', cars: ['4', '5'], crews: ['DELTA', 'ECHO'], time: '01:40.00', tied: true, marginToNext: '+00:01.50', stageWinsThisEvent: [1, 1] });
+    expect(a.storylines).toContainEqual({ type: 'stage_winner', cars: ['4', '5'], crews: ['DELTA', 'ECHO'], time: '01:40.000', tied: true, marginToNext: '+00:01.500', stageWinsThisEvent: [1, 1] });
     expect(a.storylines).toContainEqual({ type: 'shared_lead', cars: ['4', '5'], crews: ['DELTA', 'ECHO'] });
   });
 
@@ -122,8 +122,8 @@ describe('fact sheet: penalties', () => {
 
   it('includes the penalty in the stage time and ranking, like the board', () => {
     expect(a.stageResults.map(r => [r.position, r.car, r.stageTime, r.penaltySeconds])).toEqual([
-      [1, '8', '01:45.00', 0],
-      [2, '7', '01:50.00', 10],
+      [1, '8', '01:45.000', 0],
+      [2, '7', '01:50.000', 10],
     ]);
     expect(a.storylines).toContainEqual({ type: 'penalty', car: '7', crew: 'GOLF', penaltySeconds: 10 });
   });
@@ -140,16 +140,16 @@ describe('fact sheet: DNF and DNS', () => {
 
   it('lists DNF/DNS unranked on the stage with the substituted classified time', () => {
     const dnf = a.stageResults.find(r => r.car === '9')!;
-    expect(dnf).toMatchObject({ position: null, status: 'DNF', stageTime: null, classifiedTime: '03:00.00' }); // slowest 120 + 60
-    expect(a.stageResults.find(r => r.car === '10')).toMatchObject({ position: null, status: 'DNS', classifiedTime: '03:00.00' });
+    expect(dnf).toMatchObject({ position: null, status: 'DNF', stageTime: null, classifiedTime: '03:00.000' }); // slowest 120 + 60
+    expect(a.stageResults.find(r => r.car === '10')).toMatchObject({ position: null, status: 'DNS', classifiedTime: '03:00.000' });
   });
 
   it('keeps DNF crews classified in the standings and flags the DNF', () => {
     const s = a.standings.find(x => x.car === '9')!;
     expect(s.totalTime).toBe(secondsToTime(103 + 180));
     expect(s.dnfDnsCount).toBe(1);
-    expect(a.storylines).toContainEqual({ type: 'dnf', car: '9', crew: 'INDIA', classifiedTime: '03:00.00' });
-    expect(a.storylines).toContainEqual({ type: 'dns', car: '10', crew: 'JULIET', classifiedTime: '03:00.00' });
+    expect(a.storylines).toContainEqual({ type: 'dnf', car: '9', crew: 'INDIA', classifiedTime: '03:00.000' });
+    expect(a.storylines).toContainEqual({ type: 'dns', car: '10', crew: 'JULIET', classifiedTime: '03:00.000' });
   });
 });
 
@@ -230,14 +230,14 @@ describe('fact sheet: event-wide stories and headlines', () => {
   const sheet = buildFactSheet(field, settings, 2);
 
   it('names the fastest crew across all classes', () => {
-    expect(sheet.eventStorylines).toContainEqual({ type: 'fastest_overall', cars: ['2'], crews: ['Bravo'], classes: ['A'], time: '01:45.00', tied: false, marginToNext: '+00:05.00' });
+    expect(sheet.eventStorylines).toContainEqual({ type: 'fastest_overall', cars: ['2'], crews: ['Bravo'], classes: ['A'], time: '01:45.000', tied: false, marginToNext: '+00:05.000' });
   });
 
   it('finds the closest class battle across classes in code', () => {
     // Class A neighbours: 4.00s and 12.00s apart; class B: 0.50s apart.
     expect(sheet.eventStorylines).toContainEqual({
       type: 'closest_class_battle', class: 'B',
-      ahead: { car: '7', crew: 'Kim', position: 1 }, behind: { car: '8', crew: 'Lee', position: 2 }, gap: '+00:00.50',
+      ahead: { car: '7', crew: 'Kim', position: 1 }, behind: { car: '8', crew: 'Lee', position: 2 }, gap: '+00:00.500',
     });
   });
 
@@ -262,6 +262,6 @@ describe('fact sheet: dropped runs', () => {
     ];
     const a = cls(buildFactSheet(field, settings, 2), 'A');
     expect(a.stageResults.find(r => r.car === '1')).toMatchObject({ dropped: true, position: 2 });
-    expect(a.standings.map(s => [s.car, s.totalTime, s.droppedRuns])).toEqual([['1', '01:40.00', ['SS2']], ['2', '03:26.00', []]]);
+    expect(a.standings.map(s => [s.car, s.totalTime, s.droppedRuns])).toEqual([['1', '01:40.000', ['SS2']], ['2', '03:26.000', []]]);
   });
 });
