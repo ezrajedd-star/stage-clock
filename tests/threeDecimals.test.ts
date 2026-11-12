@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Driver, Settings } from '../src/types';
-import { secondsToTime, timeToSeconds } from '../src/lib/rallyUtils';
+import { secondsToTime, timeToSeconds, formatGap } from '../src/lib/rallyUtils';
 import { buildFactSheet } from '../src/lib/factSheet';
 import { verifyDraft } from '../src/lib/verifyDraft';
 
@@ -16,6 +16,11 @@ describe('times to the thousandth', () => {
     expect(secondsToTime(0.1 + 0.2)).toBe('00:00.300');
     expect(secondsToTime(59.9999999)).toBe('01:00.000');
     expect(secondsToTime(125.425 + 130.456)).toBe('04:15.881');
+  });
+
+  it('shows board gaps without leading zeros', () => {
+    expect([0.425, 3.326, 20.096, 73.04, 910.447, 3725.001].map(formatGap))
+      .toEqual(['+0.425', '+3.326', '+20.096', '+1:13.040', '+15:10.447', '+1:02:05.001']);
   });
 
   it('reads times typed with 3, 2 or 1 decimals', () => {
