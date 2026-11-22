@@ -26,12 +26,17 @@ import InputConsole from './components/InputConsole';
 import ReportPanel from './components/ReportPanel';
 import ShareModal from './components/ShareModal';
 import ResetEventDialog from './components/ResetEventDialog';
+import CloseLegDialog from './components/CloseLegDialog';
+import type { ParxLeg } from './lib/parxConfig';
 import { MasterEntryList, ClassStandings } from './components/ResultsDisplay';
 import { motion } from 'motion/react';
-import { Activity, LogIn, Trophy, Timer, Shield, Settings as SettingsIcon, QrCode, RotateCcw } from 'lucide-react';
+import { Activity, LogIn, Trophy, Timer, Shield, Settings as SettingsIcon, QrCode, RotateCcw, Flag, Lock, Unlock, Send } from 'lucide-react';
 
 // Must match the admin email in firestore.rules.
 const ADMIN_EMAIL = 'ezrajedd@gmail.com';
+
+// PARX Open website (leg list + "View on PARX Open" links). Set VITE_PARX_SITE_URL in Vercel.
+const PARX_SITE_URL = ((import.meta as unknown as { env?: Record<string, string | undefined> }).env?.VITE_PARX_SITE_URL ?? '').replace(/\/$/, '');
 
 export default function App() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -45,6 +50,10 @@ export default function App() {
   const [showReport, setShowReport] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showReset, setShowReset] = useState(false);
+  const [showCloseLeg, setShowCloseLeg] = useState(false);
+  const [publishState, setPublishState] = useState<{ busy: boolean; error: string | null; done: boolean }>({ busy: false, error: null, done: false });
+  // While a leg is closed (published to PARX Open) the board is locked.
+  const isClosed = !!settings.closedAt;
   // Only the admin can wipe the event (the reset button is not shown to other operators).
   const isAdmin = !!user?.emailVerified && user.email?.toLowerCase() === ADMIN_EMAIL;
 
@@ -86,7 +95,10 @@ export default function App() {
         setSettings({
           dnfPenalty: data.dnfPenalty ?? 60,
           dnfCalculationMethod: data.dnfCalculationMethod ?? 'class',
-          eventName: typeof data.eventName === 'string' ? data.eventName : undefined
+          eventName: typeof data.eventName === 'string' ? data.eventName : undefined,
+          parxLegSlug: typeof data.parxLegSlug === 'string' ? data.parxLegSlug : undefined,
+          closedAt: typeof data.closedAt === 'string' ? data.closedAt : undefined,
+          closedBy: typeof data.closedBy === 'string' ? data.closedBy : undefined,
         });
       } else if (user) {
         // Init default settings if they don't exist, only if user is signed in
@@ -153,8 +165,63 @@ export default function App() {
       snapshot.docs.slice(i, i + 400).forEach(d => batch.delete(d.ref));
       await batch.commit();
     }
-    await setDoc(doc(db, 'settings', 'global'), { eventName: deleteField() }, { merge: true });
+    await setDoc(doc(db, 'settings', 'global'), { eventName: deleteField(), parxLegSlug: deleteField(), closedAt: deleteField(), closedBy: deleteField() }, { merge: true });
     setError(null);
+  };
+
+  // ---- PARX Open: close the leg and publish the final results ----------------------------
+  // Asks the server (admin only) to start the PARX Open import for the leg. Throws a readable message.
+  const publishToParx = async (legSlug: string): Promise<{ actionsUrl?: string }> => {
+    const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+    if (!token) throw new Error('Sign in again to publish.');
+    let res: Response;
+    try {
+      res = await fetch('/api/close-leg', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ leg: legSlug }),
+      });
+    } catch {
+      throw new Error('Could not reach the server. Check the connection and tap “Retry publish”.');
+    }
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.message ?? `Publishing failed (${res.status}).`);
+    return { actionsUrl: body.actionsUrl };
+  };
+
+  // Marks the leg closed first (so the board locks even if publishing fails), then publishes.
+  const handleCloseLeg = async (leg: ParxLeg) => {
+    await setDoc(doc(db, 'settings', 'global'), {
+      parxLegSlug: leg.slug,
+      closedAt: new Date().toISOString(),
+      closedBy: user?.email?.toLowerCase() ?? '',
+    }, { merge: true });
+    try {
+      const r = await publishToParx(leg.slug);
+      setPublishState({ busy: false, error: null, done: true });
+      return r;
+    } catch (err: any) {
+      setPublishState({ busy: false, error: err.message, done: false });
+      throw err;
+    }
+  };
+
+  const handleRetryPublish = async () => {
+    if (!settings.parxLegSlug) return;
+    setPublishState({ busy: true, error: null, done: false });
+    try {
+      await publishToParx(settings.parxLegSlug);
+      setPublishState({ busy: false, error: null, done: true });
+    } catch (err: any) {
+      setPublishState({ busy: false, error: err.message, done: false });
+    }
+  };
+
+  // Reopens the board to correct a time. Closing again republishes (the PARX results are replaced).
+  const handleReopenLeg = async () => {
+    if (!window.confirm('Reopen this leg? The board unlocks for corrections. Close it again to republish the results to PARX Open.')) return;
+    await handleUpdateSettings({ closedAt: deleteField() as unknown as string, closedBy: deleteField() as unknown as string });
+    setPublishState({ busy: false, error: null, done: false });
   };
 
   // Drops (or restores) one stage run of an entry: a dropped run stays on the board but
@@ -333,9 +400,11 @@ export default function App() {
           <div className="hidden md:flex border-r border-(--line) pr-8 items-center gap-3">
             <div>
               <p className="text-[10px] text-(--text-secondary) uppercase mb-1">Status</p>
-              <p className="text-lg font-mono text-(--accent) font-bold">LIVE FEED</p>
+              <p className="text-lg font-mono text-(--accent) font-bold">{isClosed ? `FINAL${settings.parxLegSlug ? ` · ${settings.parxLegSlug.toUpperCase()}` : ''}` : 'LIVE FEED'}</p>
             </div>
-            <div className="w-2.5 h-2.5 rounded-full bg-(--accent-ready) animate-pulse shadow-[0_0_10px_var(--accent-ready)]" />
+            {isClosed
+              ? <Lock size={14} className="text-(--accent)" aria-label="Leg closed" />
+              : <div className="w-2.5 h-2.5 rounded-full bg-(--accent-ready) animate-pulse shadow-[0_0_10px_var(--accent-ready)]" />}
           </div>
           <div>
             {!user ? (
@@ -366,8 +435,8 @@ export default function App() {
                 settings={settings}
                 showHidden={showHidden}
                 onToggleShowHidden={() => setShowHidden(!showHidden)}
-                onToggleHidden={isOperator ? handleToggleHidden : undefined}
-                onDeleteDriver={isOperator ? handleDeleteDriver : undefined}
+                onToggleHidden={isOperator && !isClosed ? handleToggleHidden : undefined}
+                onDeleteDriver={isOperator && !isClosed ? handleDeleteDriver : undefined}
                 onOpenReport={isOperator ? () => setShowReport(true) : undefined}
               />
             </div>
@@ -392,15 +461,61 @@ export default function App() {
             </div>
             
             <div className="flex-1 md:overflow-y-auto custom-scrollbar">
-              <InputConsole 
-                onUpdate={handleUpdate} 
-                onUpdateCarModel={handleUpdateCarModel}
-                onToggleDropRun={handleToggleDropRun}
-                isLoading={processing} 
-                drivers={drivers}
-                settings={settings}
-                onUpdateSettings={handleUpdateSettings}
-              />
+              {isClosed ? (
+                <div className="p-3 space-y-3 font-mono">
+                  <div className="border border-(--accent)/40 bg-(--accent)/5 p-3 space-y-1.5">
+                    <p className="text-[10px] text-(--accent) uppercase font-black tracking-widest flex items-center gap-1.5"><Lock size={11} /> Leg closed</p>
+                    <p className="text-[11px] text-white leading-relaxed">
+                      {settings.parxLegSlug ? `Published to PARX Open as “${settings.parxLegSlug}”.` : 'Closed.'} The board is locked.
+                    </p>
+                    <p className="text-[10px] text-(--text-secondary)">
+                      {new Date(settings.closedAt!).toLocaleString()}{settings.closedBy ? ` · ${settings.closedBy.split('@')[0]}` : ''}
+                    </p>
+                    {publishState.done && <p className="text-[10px] text-(--accent-ready) uppercase">Publish request sent — results on PARX Open in about 2 minutes.</p>}
+                    {publishState.error && <p className="text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 p-2">{publishState.error}</p>}
+                    {PARX_SITE_URL && settings.parxLegSlug && (
+                      <a href={`${PARX_SITE_URL}/results/${settings.parxLegSlug}`} target="_blank" rel="noopener noreferrer" className="block text-[10px] text-(--accent) underline uppercase tracking-widest">View on PARX Open</a>
+                    )}
+                  </div>
+                  {isAdmin && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={handleRetryPublish}
+                        disabled={publishState.busy || !settings.parxLegSlug}
+                        className="h-8 flex items-center justify-center gap-1.5 border border-(--line) text-(--text-secondary) hover:text-white hover:border-white font-mono uppercase font-black text-[9px] tracking-widest transition-colors disabled:opacity-40"
+                      >
+                        <Send size={11} /> {publishState.busy ? 'Publishing…' : 'Retry publish'}
+                      </button>
+                      <button
+                        onClick={() => { handleReopenLeg().catch(() => {}); }}
+                        className="h-8 flex items-center justify-center gap-1.5 border border-(--line) text-(--text-secondary) hover:text-white hover:border-white font-mono uppercase font-black text-[9px] tracking-widest transition-colors"
+                      >
+                        <Unlock size={11} /> Reopen leg
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <InputConsole 
+                  onUpdate={handleUpdate} 
+                  onUpdateCarModel={handleUpdateCarModel}
+                  onToggleDropRun={handleToggleDropRun}
+                  isLoading={processing} 
+                  drivers={drivers}
+                  settings={settings}
+                  onUpdateSettings={handleUpdateSettings}
+                />
+              )}
+              {isAdmin && !isClosed && (
+                <div className="px-3 pb-2">
+                  <button
+                    onClick={() => setShowCloseLeg(true)}
+                    className="w-full h-9 flex items-center justify-center gap-1.5 bg-(--accent) text-black hover:bg-white font-mono uppercase font-black text-[10px] tracking-widest transition-colors"
+                  >
+                    <Flag size={12} /> Close leg &amp; publish to PARX Open
+                  </button>
+                </div>
+              )}
               {isAdmin && (
                 <div className="px-3 pb-3">
                   <button
@@ -417,6 +532,10 @@ export default function App() {
       </main>
 
       {showShare && <ShareModal onClose={() => setShowShare(false)} />}
+
+      {isAdmin && showCloseLeg && (
+        <CloseLegDialog drivers={drivers} parxSiteUrl={PARX_SITE_URL} onConfirm={handleCloseLeg} onClose={() => setShowCloseLeg(false)} />
+      )}
 
       {isAdmin && showReset && (
         <ResetEventDialog drivers={drivers} settings={settings} onConfirm={handleResetEvent} onClose={() => setShowReset(false)} />

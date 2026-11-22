@@ -36,6 +36,7 @@ The site is hosted on Vercel at https://stage-clock-rho.vercel.app/. Every push 
 | Variable | Where | Purpose |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Vercel → Project → Settings → Environment Variables (all environments); `.env.local` for local dev | Claude API key for the Stage Report Writer. Read only by the server function, never sent to the browser. Never commit a real key. |
+| `PARX_GITHUB_TOKEN`, `PARX_GITHUB_REPO`, `VITE_PARX_SITE_URL` | Same place | PARX Open publishing; see [PARX Open: close a leg and publish](#parx-open-close-a-leg-and-publish). |
 
 ## Stage Report Writer
 
@@ -48,6 +49,28 @@ How accuracy is protected:
 3. **Number check** (`src/lib/verifyDraft.ts`): every time, gap, penalty, position, place count and car number in the draft is checked against the fact sheet, and crew names must sit next to their own car number. On a mismatch the server regenerates once with the list of problems. If it still fails, the panel shows the draft as **Not verified** with the problem items highlighted. Edits are re-checked live.
 
 The endpoint only answers signed-in operators (the admin or emails in `operators`), reads the results from Firestore itself, and returns clear errors for a missing or invalid key, rate limits, network failures and stages without results. New formats can be added in `REPORT_FORMATS` (`src/lib/reportConfig.ts`).
+
+## PARX Open: close a leg and publish
+
+Stage Clock is the live timing for PARX Open. When a leg is over, the admin taps **Close leg & publish to PARX Open** (Input Terminal, admin only):
+
+1. Choose the PARX Open leg (the list comes from `VITE_PARX_SITE_URL/api/legs.json`; a built-in list is used if the site can't be reached).
+2. Review the pre-flight check: crews missing a time on a stage others ran are published as DNF (unclassified), and a driver with two visible rows stops the import. Fix these first by entering DNF/DNS or hiding the wrong row.
+3. Confirm. Stage Clock marks the leg closed (`settings/global.closedAt`, `parxLegSlug`, `closedBy`) and the board locks: no new times, no hide/delete. Then `api/close-leg.ts` asks GitHub to run the PARX Open workflow **Import results from Stage Clock**. That workflow reads the results straight from Firestore (public read), validates them and commits them to the PARX Open repo. Vercel redeploys the site, and the results and standings appear in about 2 minutes.
+
+If publishing fails, the panel shows why and offers **Retry publish**. **Reopen leg** unlocks the board for corrections; closing again republishes and replaces the PARX results. **Reset event data** also clears the closed state.
+
+Hidden rows are never published. Times, DNF/DNS substitutes, penalties and dropped runs are taken exactly as the board calculates them: the PARX importer uses a copy of `src/lib/standings.ts`. If the timing rules change here, update that copy in the PARX repo (`lib/stage-clock/vendor.ts`).
+
+Setup (Vercel → Project → Settings → Environment Variables):
+
+| Variable | Purpose |
+|---|---|
+| `PARX_GITHUB_TOKEN` | Server only. A GitHub fine-grained personal access token with access to the PARX Open repository only, permission **Contents: Read and write** (needed for repository dispatch). |
+| `PARX_GITHUB_REPO` | Optional, `owner/name` of the PARX Open repo. Default `ezrajedd-star/PARX-Open-MVP-Website`. |
+| `VITE_PARX_SITE_URL` | PARX Open website URL, e.g. `https://parxopen.com` (no trailing slash). Used for the leg list and "View on PARX Open" links. Rebuild after changing it. |
+
+**One domain:** serve Stage Clock on a subdomain of the PARX Open domain, for example `live.parxopen.com`. Add the domain in this Vercel project, then add it to Firebase → Authentication → Settings → Authorized domains so Google sign-in keeps working.
 
 ## Firebase configuration
 

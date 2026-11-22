@@ -23,6 +23,10 @@ export interface Settings {
   dnfPenalty: number; // seconds to add to slowest class time
   dnfCalculationMethod?: 'class' | 'overall'; // choice between class and overall slowest time
   eventName?: string; // used by the Stage Report Writer
+  // PARX Open integration: set by "Close leg & publish". While closedAt is set the board is locked.
+  parxLegSlug?: string; // PARX Open leg slug, e.g. "ormoc"
+  closedAt?: string; // ISO timestamp
+  closedBy?: string; // operator email
 }
 
 export enum OperationType {
